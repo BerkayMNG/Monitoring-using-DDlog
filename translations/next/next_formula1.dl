@@ -1,5 +1,4 @@
-//Formula NEXT[2,4] P(1) (where intervall & id of P can be easily changed)
-
+//Formula NEXT[2,4] P(1)
 //input 
 input stream Timestamp(tp:s32, ts:s32)
 input stream P(tp:s32, id:s32)

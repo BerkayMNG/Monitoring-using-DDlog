@@ -1,6 +1,15 @@
+
+/*
+REMARK:
+
+For a better overview (with less comments) check the files next_formula1.dl &
+next_formula2.dl under the same directory. 
+*/
+
+
+
 /*
 Below: formula NEXT[2,4] P(1) (where intervall & id of P can be easily changed)
-
 Check it on https://traytel.bitbucket.io/verimon/
 Signatrue:      p(x:int)
 MFOTL formula:  NEXT[2,4] p(x)
@@ -55,7 +64,7 @@ Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_ne
 
 
 /*
-//Below: formula NEXT[2,4] P(x)
+//Below: formula NEXT[2,4] P(x) 
 
 //input 
 input stream Timestamp(tp:s32, ts:s32)
