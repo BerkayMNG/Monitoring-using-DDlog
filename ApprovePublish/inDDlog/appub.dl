@@ -1,0 +1,41 @@
+//Similarity to sliding window algorithm
+input stream Timestamp(tp:u32, ts: u32)
+input stream Approve(tp:u32, id: u32)
+input stream Publish(tp:u32, id: u32)
+
+
+//To have some form of intervalls
+relation Intervall(min: u32, max: u32)
+Intervall(8,20) :- .
+
+relation Data_prev(ts: u32,id: u32)
+relation Data_in(tp:u32, ts: u32,id: u32)
+relation MaxTp(tp: u32)
+output relation Violation(tp:u32, ts: u32, id: u32)
+
+Data_prev(ts,id) :- Approve'(tp, id), Timestamp'(tp, ts), Intervall(min,max), min != 0.
+Data_prev(ts_old,id) :- Data_prev-1(ts_old, id), Intervall(min,max), Timestamp'(tp, ts),
+                        ts-ts_old < min.
+
+MaxTp(max) :- Timestamp'(tp,ts), var max = tp.group_by(()).max().
+
+
+// Basically: By batching we need to be careful because it might happen that 
+// tuples are in Data_in but for some timepoints where publish happens
+// it is still a violation
+
+
+
+Data_in(tp,ts_old,id) :- Approve'(tp2, id), Timestamp'(tp2, ts_old),Timestamp'(tp,ts_curr), Intervall(min,max),
+                        ts_curr - ts_old <= max, ts_curr-ts_old >= min,  tp >= tp2.
+
+
+Data_in(tp,ts_old,id) :- Data_prev-1(ts_old,id), Timestamp'(tp, ts_curr),Intervall(min,max),
+                        ts_curr - ts_old <= max, ts_curr-ts_old >= min.
+
+
+Data_in(tp,ts_old,id) :- MaxTp-1(m), Data_in-1(m, ts_old,id), Timestamp'( tp, ts_curr),Intervall(min,max),
+                        ts_curr-ts_old <= max, ts_curr-ts_old >= min.
+
+
+Violation(tp, ts,id) :- Publish'(tp, id), not Data_in(tp,_,id), Timestamp'(tp, ts).
