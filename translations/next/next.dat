@@ -1,0 +1,37 @@
+start;
+insert Timestamp(0,1);
+insert P(0,2);
+commit;
+dump;
+
+start;
+insert Timestamp(1,2);
+insert P(1,2);
+commit;
+dump;
+
+start;
+insert Timestamp(2,4);
+insert P(2,2);
+insert P(2,3);
+insert P(2,1);
+commit;
+dump;
+
+start;
+insert Timestamp(3,7);
+insert P(3,1);
+commit;
+dump;
+
+start;
+insert Timestamp(4,11);
+insert P(4,1);
+commit;
+dump;
+
+#dummy input
+start;
+insert Timestamp(5,11);
+commit;
+dump;

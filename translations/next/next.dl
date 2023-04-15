@@ -1,0 +1,80 @@
+/*
+Below: formula NEXT[2,4] P(1) (where intervall & id of P can be easily changed)
+
+Check it on https://traytel.bitbucket.io/verimon/
+Signatrue:      p(x:int)
+MFOTL formula:  NEXT[2,4] p(x)
+log:            @1 p(2)
+                @2 p(2) 
+                @4 p(2) p(3) p(1)
+                @7 p(1)
+                @11 p(1)
+*/
+//input 
+input stream Timestamp(tp:s32, ts:s32)
+input stream P(tp:s32, id:s32)
+
+//Auxiliary relation
+relation Intervall(min:s32, max:s32)
+relation Cache(tp:s32, ts:s32)
+relation Value(id:s32)
+Intervall(2,4) :- .
+Value(1) :- .
+
+//output
+output relation Satisfied(tp:s32, ts:s32, id:s32)
+output relation Violations(tp:s32, ts:s32, id:s32)
+
+
+//Here cache stores timestamps only as far back as needed (-1 tp from earliest Timestamp of current batch)
+Cache(tp,ts) :- Timestamp'(tp,ts).
+Cache(tp_old,ts_old) :- Cache-1(tp_old,ts_old), Timestamp'(tp_new,ts_new), Intervall(min,max),
+                        tp_old == tp_new-1.
+
+// If at current tp P(1) occurs and last timestamp was in the corresponding intervall, formula satisified at last Timestamp
+Satisfied(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
+                                Intervall(min,max), Value(id), 
+                                ts_new - ts_old <= max, ts_new - ts_old >= min, tp_old == tp_new-1.
+
+/*
+Violations occur when either:
+- at next timepoint there is no P(1)
+- or next timepoint is not in the corresponding intervall
+
+IMPORTANT: last stream/input will (correctly) be a violation in Verimon.
+To also capture this case we must artifically add a last dummy timestamp in the
+.dat file (alternatively we could introduce a "end" stream, but this seems more elegant)
+*/
+Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old), Value(id), Timestamp'(tp_new, ts_new), not P'(tp_new,id),
+                                tp_old == tp_new-1.
+Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
+                                Intervall(min,max), Value(id), ts_new - ts_old > max, tp_old == tp_new-1.
+Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
+                                Intervall(min,max), Value(id), ts_new - ts_old < min, tp_old == tp_new-1.
+
+
+
+/*
+//Below: formula NEXT[2,4] P(x)
+
+//input 
+input stream Timestamp(tp:s32, ts:s32)
+input stream P(tp:s32, id:s32)
+
+//Auxiliary relation
+relation Intervall(min:s32, max:s32)
+relation Cache(tp:s32, ts:s32)
+Intervall(2,4) :- .
+
+//output
+output relation Satisfied(tp:s32, ts:s32, id:s32)
+
+
+Cache(tp,ts) :- Timestamp'(tp,ts).
+Cache(tp_old,ts_old) :- Cache-1(tp_old,ts_old), Timestamp'(tp_new,ts_new), Intervall(min,max),
+                        tp_old == tp_new-1.
+
+// If at current tp P(1) occurs and last timestamp was in the corresponding intervall, formula satisified at last Timestamp
+Satisfied(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
+                                Intervall(min,max), ts_new - ts_old <= max, ts_new - ts_old >= min, tp_old == tp_new-1.
+*/
