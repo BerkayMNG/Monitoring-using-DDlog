@@ -1,1 +1,1 @@
-publish(r) IMPLIES ONCE[0,7s] approve(r)
+publish(r) IMPLIES ONCE[8,20s] approve(r)
