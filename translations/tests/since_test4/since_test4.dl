@@ -1,7 +1,7 @@
 /*
-Testing of SINCE operator where 0 is in the intervall. The concrete Formula:
+Testing of SINCE operator where the intervall is [min,max] with min != 0. The concrete Formula:
 
-P(x) SINCE[0,3] Q(x)
+P(x) SINCE[20,30] Q(x)
 
 */
 
@@ -9,7 +9,7 @@ input stream Timestamp(tp:s32, ts:s32)
 input stream P(tp:s32, id:s32)
 input stream Q(tp:s32, id:s32)
 relation Intervall(min:s32, max:s32)
-Intervall(0,3) :- .
+Intervall(20,30) :- .
 
 
 relation Data_prev(ap:s32, tp:s32, ts:s32, id:s32)

@@ -28,8 +28,8 @@ for id in range(size):
     ts = ts + random.randint(0,3)
     chainlength = random.randint(I_min, I_max)
     Data.append([2,id,ts])
-    for dist_back in range(chainlength):
-        Data.append([1,id,ts + (dist_back+1)])
+    for dist in range(chainlength):
+        Data.append([1,id,ts + (dist1)])
 
 #special case where we have @ts p(x) q(x) (should be still satisfied since I_min == 0)
 ts = ts + random.randint(0,3)
