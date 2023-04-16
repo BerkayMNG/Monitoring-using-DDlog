@@ -1,48 +1,31 @@
-//Formula P(x) SINCE[min,max] Q(x)
+/*
+Testing of SINCE operator where 0 is in the intervall. The concrete Formula:
 
-//This program mimics the sliding window algorithm
+P(x) SINCE[0,3s] Q(x)
 
-//input
+*/
+
 input stream Timestamp(tp:s32, ts:s32)
 input stream P(tp:s32, id:s32)
 input stream Q(tp:s32, id:s32)
-input relation Intervall(min:s32, max:s32) //more generic
-
-/*
-if you want to fix the intervall use this
 relation Intervall(min:s32, max:s32)
-Intervall(2,4) :- . 
-*/
+Intervall(0,3) :- .
 
-//Auxiliary
-//ap stands for analysis point (at which timepoint we are currently making the analysis)
+
 relation Data_prev(ap:s32, tp:s32, ts:s32, id:s32)
 relation Data_in(ap:s32, tp:s32, ts:s32, id:s32)
 relation Tuple_in(ap:s32, tp:s32, ts:s32, id:s32)
 relation Tuple_since(ap:s32, tp:s32, ts:s32, id:s32)
 
-//output
 output relation Satisfied(ap:s32, ts:s32, id:s32)
 
-/*
-First rule: put in Data_prev if before intervall at current timepoint (=current analysispoint)
-Second rule: Since we are working with batches, we might still have valid tuples in Data_prev at later analysis points
-Third rule: Also need to consider valid tuples from last transaction
-*/
-//Data_prev(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), Intervall(min,max),
-                            //min > 0.
 Data_prev(tp_new,tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Timestamp'(tp_old,ts_old), Q'(tp_old,id), Intervall(min,max),
                                         ts_new - ts_old < min, tp_old <= tp_new.
 Data_prev(tp_new,tp_old,ts_old,id) :- Data_prev-1(ap_old, tp_old,ts_old,id), Timestamp'(tp_new,ts_new), Intervall(min,max),
                                         ts_new - ts_old < min, tp_old <= tp_new.
 
-/*
-First rule: special case if intervall is of the form [0,max]
-Second rule: state of Data_in at each analysispoint
-Third & fourth rule : Needed tuples from old transaction
-fifth rule: Extensions of Second rule -> In case intervalls lower bound is zero, all tuples land directly in Data_in (i.e.
-            newer analysis points of the same events)
-*/
+
+
 Data_in(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), Intervall(min,max),
                             min == 0.
 Data_in(tp_new,tp_old,ts_old,id) :- Data_prev(ap_old,tp_old,ts_old,id), Timestamp'(tp_new,ts_new), Intervall(min,max),
@@ -54,41 +37,14 @@ Data_in(tp_new, tp_old,ts_old,id) :- Data_in-1(ap_old, tp_old,ts_old,id), Timest
 Data_in(tp_new, tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Data_in(ap_old, tp_old,ts_old,id), Intervall(min,max),
                                         ts_new - ts_old <= max, ts_new-ts_old >= min, ap_old == tp_new-1.
 
-/*
-First rule: Get all old tuples which might be needed in the analysis, didn't fall out at some analysis points
-Second rule & third rule:   Q doesn't replace old values and this implementation will always hold earliest tuple satisfying SINCE
 
-A bit more precise:
--   2nd rule does not replace old Q's still valid because there isn't a corresponding P anyway ("Since chain is broken")
-    and simultaneously doesn't miss to put in Q to tuple_since when needed ("start of Since chain")
-
--   3rd rule "updates the chain" (i.e. is temporary Since chain still relevant at current analysis point?)
-*/
 Tuple_since(ap,tp,ts,id) :- Tuple_since-1(ap,tp,ts,id), Timestamp'(tp_new,ts_new), 
                                 Intervall(min,max), ts_new - ts <= max, tp_new -1 == ap.
 Tuple_since(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), not P'(tp,id).
 Tuple_since(tp_new,tp_old,ts_old,id) :- Timestamp'(tp_new, ts_new), P'(tp_new,id),Tuple_since(tp_new-1,tp_old,ts_old,id),
                                         Intervall(min,max), ts_new-ts_old <= max.
 
-/*
-Output like VeriMon
-*/
+
 Tuple_in(ap,tp,ts,id) :- Data_in(ap,tp,ts,id), Tuple_since(ap, tp,ts,id).
 Satisfied(ap,ts_new,id) :- Satisfied-1(ap,ts_new,id).
 Satisfied(ap,ts_new,id) :- Tuple_in(ap,tp,ts,id), Timestamp'(ap,ts_new).
-
-/*
-Check it on: 
-https://traytel.bitbucket.io/verimon/
-
-signature:          p(x:int)
-                    q(x:int)
-
-MFOTL formula:      q(x) SINCE[2,4] p(x)
-
-log:                @1 q(1) q(2) q(3)
-                    @2 p(2) p(3)
-                    @3 p(2) p(3) q(1) q(2)
-                    @7 p(1)
-
-*/
