@@ -1,2 +1,3 @@
 **/*_ddlog/
 **/__pycache__/
+/Monitoring-using_DDlog/tests/*.sh
