@@ -4,10 +4,12 @@ sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
 from myLib import runTest_since
 
 def test(test_description, Data, datFile, logFile, I_min,I_max):
-    print()
     print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
     runTest_since(Data, datFile, logFile, I_min,I_max)
-    print()
+    
+
+
+
 
 #Formula is P(x) SINCE[0,3] Q(x)
 I_min = 0
@@ -16,6 +18,10 @@ size = 100
 
 logFile = "since_test1.log"
 datFile = "since_test1.dat"
+
+print()
+print('\x1b[6;30;47m' + 'Testing formula p(x) SINCE[' + str(I_min) + ',' + str(I_max) + '] q(x)' + ' \x1b[0m')
+print()
 
 # First test for since_test1: for each Q(x), we insert P(x)'s such that is gets satisfied
 # Namely for each q(x) we insert p(x)'s resulting in a "chainlength" lying between [i_min, I_max]
@@ -29,7 +35,7 @@ for id in range(size):
     chainlength = random.randint(I_min, I_max)
     Data.append([2,id,ts])
     for dist in range(chainlength):
-        Data.append([1,id,ts + (dist1)])
+        Data.append([1,id,ts + (dist+1)])
 
 #special case where we have @ts p(x) q(x) (should be still satisfied since I_min == 0)
 ts = ts + random.randint(0,3)
@@ -45,7 +51,7 @@ Data = []
 ts = I_max
 for id in range(size):
     ts = ts + random.randint(0,3)
-    Data.append([1,id,ts + (dist_back+1)])
+    Data.append([1,id,ts])
 
 test_description = 'Test where no id is satisfied, no q(x) occur'
 test(test_description,Data, datFile, logFile, I_min,I_max)
@@ -61,3 +67,5 @@ for i in range(size):
 
 test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
 test(test_description,Data, datFile, logFile, I_min,I_max)
+
+print()

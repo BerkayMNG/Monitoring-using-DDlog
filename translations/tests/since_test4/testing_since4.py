@@ -4,18 +4,20 @@ sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
 from myLib import runTest_since
 
 def test(test_description, Data, datFile, logFile, I_min,I_max):
-    print()
     print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
     runTest_since(Data, datFile, logFile, I_min,I_max)
-    print()
 
 #Formula is P(x) SINCE[20,30] Q(x)
 I_min = 20
 I_max = 30
-size = 30
+size = 90
 
 logFile = "since_test4.log"
 datFile = "since_test4.dat"
+
+print()
+print('\x1b[6;30;47m' + 'Testing formula p(x) SINCE[' + str(I_min) + ',' + str(I_max) + '] q(x)' + ' \x1b[0m')
+print()
 
 # Data has structure: [[class,id,ts]] meaning: class = 1 means P(id), class = 2 means Q(id). id is identity integer, ts is timestamp
 Data = []
@@ -32,7 +34,7 @@ for id in range(size):
             Data.append([1,id,ts + (dist)])   # p(x) & q(x) never occur at same ts together 
 
 test_description = 'Test where each id satisfies the Formula'
-#test(test_description,Data, datFile, logFile, I_min,I_max)
+test(test_description,Data, datFile, logFile, I_min,I_max)
 
 
 # Second test(s): No satisfactions, chain stops before lower bound of intervall is reached
@@ -50,7 +52,7 @@ for id in range(size):
             Data.append([1,id,ts + (dist)])   # p(x) & q(x) never occur at same ts together 
 
 test_description = 'Test where a "chain" stops before being satisfied'
-#test(test_description,Data, datFile, logFile, I_min,I_max)
+test(test_description,Data, datFile, logFile, I_min,I_max)
 
 # Third test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
 Data = []

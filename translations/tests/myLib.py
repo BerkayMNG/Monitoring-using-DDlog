@@ -1,6 +1,8 @@
 import re
 import os
 
+
+
 def gen_tests(Data,nameDat, nameLog, batchSize, min:int, max:int):
 
     Data.sort(key=lambda x: x[2])
@@ -71,7 +73,7 @@ def runTest_since(Data, datFile, logFile, min, max):
         passed_this_batchsize = compare(fileDDlog="outputDDlog.txt", FileLMonPoly="outputMonPoly.txt")
         if(not passed_this_batchsize):
             print('\x1b[6;30;41m'+'failed with batchsize: ' + str(batchsize) + ' \x1b[0m')
-            exit()
+            #exit()
 
         else:
             print('\x1b[6;30;42m'+'passed with batchsize: ' + str(batchsize) + ' \x1b[0m')

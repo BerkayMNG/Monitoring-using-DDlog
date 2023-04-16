@@ -4,16 +4,18 @@ sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
 from myLib import runTest_since
 
 def test(test_description, Data, datFile, logFile, I_min,I_max):
-    print()
     print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
     runTest_since(Data, datFile, logFile, I_min,I_max)
-    print()
 
 #Formula is P(x) SINCE[0,0] Q(x), So I_min=I_max = I_const = 0
 I_const = 0
 size = 1000
 logFile = "since_test3.log"
 datFile = "since_test3.dat"
+
+print()
+print('\x1b[6;30;47m' + 'Testing formula p(x) SINCE[' + str(I_const) + ',' + str(I_const) + '] q(x)' + ' \x1b[0m')
+print()
 
 
 #All satisfied
