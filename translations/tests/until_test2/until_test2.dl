@@ -1,0 +1,38 @@
+/*
+Testing of UNTIL operator with intervall of the form [x,x]. Concrete Formula:
+
+P(x) UNTIL[5,5] Q(x)
+*/
+
+//inputs
+input stream Timestamp(tp:s32, ts:s32)
+input stream P(tp:s32, id:s32)
+input stream Q(tp:s32, id:s32)
+
+//intermediate results and auxiliary relations
+input relation Intervall(min:s32, max:s32)
+Intervall(5,5)
+relation Data_cache(tp:s32, ts:s32, id:s32)
+relation Tuple_chain(ap: s32, tp:s32, ts:s32, id:s32)
+
+//output
+output relation Satisfied(tp:s32, ts:s32, id:s32)
+
+//program
+Data_cache(tp, ts, id) :- Timestamp'(tp,ts), P'(tp,id).
+Data_cache(tp_old, ts_old, id) :- Timestamp'(tp_new, ts_new), Data_cache-1(tp_old, ts_old, id), Intervall(min, max),
+                                            ts_new - ts_old <= max.
+
+
+Tuple_chain(tp,tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id), not Data_cache(tp-1,_,id).
+Tuple_chain(tp_new, tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), P'(tp_new,id), Tuple_chain(ap, tp_old,ts_old,id),
+                                        Intervall(min,max), ap == tp_new -1, ts_new - ts_old <= max.
+Tuple_chain(tp_new, tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), P'(tp_new,id), Tuple_chain-1(ap, tp_old,ts_old,id),
+                                        Intervall(min,max), ap == tp_new -1, ts_new - ts_old <= max.
+
+
+Satisfied(tp_inter,ts_inter,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new, id), Tuple_chain-1(ap,_,ts_old,id), Intervall(min,max),
+                                Data_cache(tp_inter, ts_inter, id), ap == tp_new-1, ts_new - ts_inter <= max, ts_new - ts_inter >= min.
+Satisfied(tp_inter,ts_inter,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new, id), Tuple_chain(ap,_,ts_old,id), Intervall(min,max),
+                                Data_cache(tp_inter, ts_inter, id), ap == tp_new-1, ts_new - ts_inter <= max, ts_new - ts_inter >= min.
+Satisfied(tp,ts,id) :- Timestamp'(tp,ts), Q'(tp, id), Intervall(min,max), min == 0.

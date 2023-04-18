@@ -1,0 +1,35 @@
+start;
+insert Intervall(0,2);
+commit;
+dump;
+
+start;
+insert Timestamp(0,1);
+insert P(0,1);
+commit;
+dump;
+
+start;
+insert Timestamp(1,2);
+insert P(1,1);
+commit;
+dump;
+
+
+start;
+insert Timestamp(2,3);
+insert P(2,1);
+commit;
+dump;
+
+start;
+insert Timestamp(3,4);
+insert Q(3,1);
+commit;
+dump;
+
+start;
+insert Timestamp(4,4);
+insert Q(4,2);
+commit;
+dump;

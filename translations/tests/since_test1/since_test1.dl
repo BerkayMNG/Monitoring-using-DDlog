@@ -3,6 +3,7 @@ Testing of SINCE operator where 0 is in the intervall. The concrete Formula:
 
 P(x) SINCE[0,3] Q(x)
 
+
 */
 
 input stream Timestamp(tp:s32, ts:s32)

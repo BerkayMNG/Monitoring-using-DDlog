@@ -3,9 +3,9 @@ import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
 from myLib import runTest_since
 
-def test(test_description, Data, datFile, logFile, I_min,I_max):
+def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
     print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_since(Data, datFile, logFile, I_min,I_max)
+    runTest_since(cat, Data, datFile, logFile, I_min,I_max)
     
 
 
@@ -43,7 +43,7 @@ Data.append([2,size,ts])
 Data.append([1,size,ts])
 
 test_description = 'Test where each id satisfies the Formula'
-test(test_description,Data, datFile, logFile, I_min,I_max)
+test(0,test_description,Data, datFile, logFile, I_min,I_max)
 
 
 # Second test(s): No satisfactions- only possible if there is no q(x)
@@ -54,7 +54,7 @@ for id in range(size):
     Data.append([1,id,ts])
 
 test_description = 'Test where no id is satisfied, no q(x) occur'
-test(test_description,Data, datFile, logFile, I_min,I_max)
+test(0,test_description,Data, datFile, logFile, I_min,I_max)
 
 # Third test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
 Data = []
@@ -66,6 +66,6 @@ for i in range(size):
     Data.append([signature,id,ts])
 
 test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
-test(test_description,Data, datFile, logFile, I_min,I_max)
+test(0,test_description,Data, datFile, logFile, I_min,I_max)
 
 print()

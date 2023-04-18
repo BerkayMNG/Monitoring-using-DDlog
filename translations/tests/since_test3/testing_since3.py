@@ -3,13 +3,13 @@ import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
 from myLib import runTest_since
 
-def test(test_description, Data, datFile, logFile, I_min,I_max):
+def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
     print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_since(Data, datFile, logFile, I_min,I_max)
+    runTest_since(cat,Data, datFile, logFile, I_min,I_max)
 
 #Formula is P(x) SINCE[0,0] Q(x), So I_min=I_max = I_const = 0
 I_const = 0
-size = 1000
+size = 100
 logFile = "since_test3.log"
 datFile = "since_test3.dat"
 
@@ -30,7 +30,7 @@ for id in range(size):
         Data.append([1,id,ts + ts+11]) # @ts p(x)  q(x),  also  satisfied
     
 test_description = 'All satisfied'
-test(test_description,Data, datFile, logFile, I_const,I_const)
+test(0,test_description,Data, datFile, logFile, I_const,I_const)
 
 # Second test(s): No satisfactions- only possible if no q(x)
 Data = []
@@ -39,7 +39,7 @@ for id in range(size):
     ts = ts + random.randint(0,3)
     Data.append([1,id,ts])
 test_description = 'No satisfactions'
-test(test_description,Data, datFile, logFile, I_const,I_const)
+test(0,test_description,Data, datFile, logFile, I_const,I_const)
 
 
 
@@ -53,4 +53,4 @@ for i in range(size):
     Data.append([signature,id,ts])
 
 test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
-test(test_description,Data, datFile, logFile, I_const,I_const)
+test(0,test_description,Data, datFile, logFile, I_const,I_const)

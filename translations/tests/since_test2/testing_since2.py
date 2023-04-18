@@ -3,9 +3,9 @@ import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
 from myLib import runTest_since
 
-def test(test_description, Data, datFile, logFile, I_min,I_max):
+def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
     print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_since(Data, datFile, logFile, I_min,I_max)
+    runTest_since(cat,Data, datFile, logFile, I_min,I_max)
 
 #Formula is P(x) SINCE[5,5] Q(x), So I_min=I_max = I_const = 5
 I_const = 5
@@ -31,7 +31,7 @@ for id in range(size):
             Data.append([1,id,ts + i]) # p(x) & q(x) occur at same ts together
     
 test_description = 'Satisfactions here'
-test(test_description,Data, datFile, logFile, I_const,I_const)
+test(0,test_description,Data, datFile, logFile, I_const,I_const)
 
 # Second test(s): No satisfactions, random distance (but no equal 5)
 Data = []
@@ -45,7 +45,7 @@ for id in range(size):
         Data.append([1,id,ts + random.randint(6,15)]) #after intervall
 
 test_description = 'No satisfactions'
-test(test_description,Data, datFile, logFile, I_const,I_const)
+test(0,test_description,Data, datFile, logFile, I_const,I_const)
 
 
 #third test case: not satisfied but distance between p & q is constant 5
@@ -57,7 +57,7 @@ for id in range(size):
     Data.append([1,id,ts + I_const])
 
 test_description = 'Never satisfied but constant distance of I_const'
-test(test_description,Data, datFile, logFile, I_const,I_const)
+test(0,test_description,Data, datFile, logFile, I_const,I_const)
 
 
 # 4h test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
@@ -70,4 +70,4 @@ for i in range(size):
     Data.append([signature,id,ts])
 
 test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
-test(test_description,Data, datFile, logFile, I_const,I_const)
+test(0,test_description,Data, datFile, logFile, I_const,I_const)
