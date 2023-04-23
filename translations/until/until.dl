@@ -13,9 +13,13 @@ so we save number of rules and number of intermediate relations
 
 Also analysispont in Tuple_chain is useful to differentiate between the actual timepoints and 
 the timepoints where we are right now
+
+Satisfied_cached is needed to not directly output once we observe satisfactions, since the order of the output
+does also matter
 */
 relation Data_cache(tp:s32, ts:s32, id:s32)
 relation Tuple_chain(ap: s32, tp:s32, ts:s32, id:s32)
+relation Satisfied_cached(tp:s32, ts:s32, id:s32)
 
 
 output relation Satisfied(tp:s32, ts:s32, id:s32)
@@ -49,13 +53,14 @@ First and second rule:  Current & old batch have to be considered for satisfiyin
 Third rule: Special case where we have [0,0]
 */
 
-Satisfied(tp,ts,id) :- Satisfied-1(tp,ts,id).
-Satisfied(tp_inter,ts_inter,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new, id), Tuple_chain-1(ap,tp_old,ts_old,id), Intervall(min,max),
+Satisfied_cached(tp,ts,id) :- Satisfied_cached-1(tp,ts,id).
+Satisfied_cached(tp_inter,ts_inter,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new, id), Tuple_chain-1(ap,tp_old,ts_old,id), Intervall(min,max),
                                     Data_cache(tp_inter, ts_inter, id), ap == tp_new-1, ts_new - ts_inter <= max, ts_new - ts_inter >= min,
                                     tp_inter <= tp_new-1, tp_inter >= tp_old.
-Satisfied(tp_inter,ts_inter,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new, id), Tuple_chain(ap,tp_old,ts_old,id), Intervall(min,max),
+Satisfied_cached(tp_inter,ts_inter,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new, id), Tuple_chain(ap,tp_old,ts_old,id), Intervall(min,max),
                                     Data_cache(tp_inter, ts_inter, id), ap == tp_new-1, ts_new - ts_inter <= max, ts_new - ts_inter >= min,
                                     tp_inter <= tp_new-1, tp_inter >= tp_old.
-Satisfied(tp,ts,id) :- Timestamp'(tp,ts), Q'(tp, id), Intervall(min,max), min == 0.
+Satisfied_cached(tp,ts,id) :- Timestamp'(tp,ts), Q'(tp, id), Intervall(min,max), min == 0.
 
 
+Satisfied(tp,ts,id) :- Satisfied_cached(tp,ts,id), Timestamp'(tp_curr, ts_curr), Intervall(min,max), ts_curr - ts > max.

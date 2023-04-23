@@ -136,7 +136,7 @@ def runTest(cat,path,Data,datFile,logFile,min,max):
         #We don't compile the programm for each intervall & testcase since this uses a lot of memory- instead just provide the intervall as input
         #in the original translation (/Monitoring-using-DDlog/translations) 
         os.system(path + " " + datFile + " > outputDDlog.txt")
-        os.system("monpoly -sig " + logFile_prefix+ ".sig -formula " + logFile_prefix + ".mfotl -log " + logFile_prefix+ ".log > outputMonPoly.txt")
+        os.system("monpoly -sig " + logFile_prefix+ ".sig -formula " + logFile_prefix + ".mfotl -log " + logFile_prefix+ ".log  > outputMonPoly.txt")
         passed_this_batchsize = compare(fileDDlog="outputDDlog.txt", FileLMonPoly="outputMonPoly.txt")
         if(not passed_this_batchsize):
             
