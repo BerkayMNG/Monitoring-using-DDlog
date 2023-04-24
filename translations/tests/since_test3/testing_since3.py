@@ -1,7 +1,7 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import test
+from myLib import test_binary
 
 #Formula is P(x) SINCE[0,0] Q(x), So I_min=I_max = I_const = 0
 I_const = 0
@@ -28,7 +28,7 @@ for id in range(size):
         Data.append([1,id,ts + ts+11]) # @ts p(x)  q(x),  also  satisfied
     
 test_description = 'All satisfied, "randomly" wrapped'
-test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
+test_binary(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
 
 # Second test(s): No satisfactions- only possible if no q(x)
 Data = []
@@ -37,7 +37,7 @@ for id in range(size):
     ts = ts + random.randint(0,3)
     Data.append([1,id,ts])
 test_description = 'No satisfactions,  "randomly" wrapped'
-test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
+test_binary(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
 
 
 
@@ -51,4 +51,4 @@ for i in range(size):
     Data.append([signature,id,ts])
 
 test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "randomly" wrapped'
-test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
+test_binary(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)

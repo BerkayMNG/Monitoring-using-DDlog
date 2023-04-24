@@ -1,7 +1,7 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import test
+from myLib import test_binary
     
 
 
@@ -50,7 +50,7 @@ Data.append([2,size,ts])
 Data.append([1,size,ts])
 
 test_description = 'Test where each id satisfies the Formula, all wrapped'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
 
 
 
@@ -63,7 +63,7 @@ for i in range(size):
     Data.append([1,id,ts])
 
 test_description = 'Test with no q(x), so formula gets never satisfied, "random" wrapping'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,4,True)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,4,True)
 
 
 
@@ -77,7 +77,7 @@ for i in range(size):
     Data.append([signature,id,ts])
 
 test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "random" wrapped' 
-test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 
 
@@ -99,7 +99,7 @@ for i in range(size):
             Data.append([1,id,ts + dist])
         Data.append([1,id,ts + chainlength])
 test_description = 'Test where each id satisfies the Formula, complete wrapped'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
 
 
 
@@ -111,7 +111,7 @@ for i in range(size):
     ts = ts + random.randint(0, I_max-1)
     Data.append([1,id,ts])
 test_description = 'Test with no q(x), so formula gets never satisfied, not wrapped'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
 
 
 
@@ -125,4 +125,4 @@ for i in range(size):
     Data.append([signature,id,ts])
 
 test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "random" wrapped'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)

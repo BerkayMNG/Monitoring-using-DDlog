@@ -1,7 +1,7 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import test
+from myLib import test_binary
 
     
 
@@ -37,7 +37,7 @@ for i in range(size):
         ts =  ts + random.randint(0,3)
 
 test_description = 'Test where each id satisfies the Formula, with "random" wrapping'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 
 # Case2: No satisfaction, only possible when no q(x) occurs
@@ -50,7 +50,7 @@ for id in range(size):
     Data.append([1,id,ts])
 
 test_description = 'No satisfactions, with "random" wrapping'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 
 #random
@@ -63,7 +63,7 @@ for i in range(size):
     Data.append([signature,id,ts])
 
 test_description = 'Random- might or might not be satisfied, with "random" wrapping'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 
 

@@ -1,7 +1,7 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import test
+from myLib import test_binary
     
 
 
@@ -10,7 +10,7 @@ from myLib import test
 #Formula is P(x) SINCE[0,3] Q(x)
 I_min = 0
 I_max = 3
-size = 5
+size = 100
 path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
 
 logFile = "since_test1.log"
@@ -40,7 +40,7 @@ Data.append([2,size,ts])
 Data.append([1,size,ts])
 
 test_description = 'Test where each id satisfies the Formula, completely wrapped'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
 
 
 # Second test(s): No satisfactions- only possible if there is no q(x)
@@ -51,7 +51,7 @@ for id in range(size):
     Data.append([1,id,ts])
 
 test_description = 'Test where no id is satisfied, no q(x) occur,"randomly" wrapped'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
 
 # Third test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
 Data = []
@@ -63,6 +63,6 @@ for i in range(size):
     Data.append([signature,id,ts])
 
 test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "randomly" wrapped'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 print()

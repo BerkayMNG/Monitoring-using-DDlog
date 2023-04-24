@@ -1,7 +1,7 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import test
+from myLib import test_binary
     
 
 
@@ -31,7 +31,7 @@ for i in range(size):
     Data.append([2,id,ts])
 
 test_description = 'Test where each id satisfies the Formula, no wrapping'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
 
 
 
@@ -52,7 +52,7 @@ for id in range(size):
     Data.append([2,id,ts])
 
 test_description = 'Never satisfied, no wrapping'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
 
 
 #randomly satisfied or not, "wrap" events of same ts to same tp
@@ -66,7 +66,7 @@ for i in range(3*size):
 
 
 test_description = 'Random- might or might not be satisfied. Wrapped events'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
 
 
 

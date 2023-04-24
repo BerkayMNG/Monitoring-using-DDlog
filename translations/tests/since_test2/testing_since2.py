@@ -1,11 +1,11 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import test
+from myLib import test_binary
 
 #Formula is P(x) SINCE[5,5] Q(x), So I_min=I_max = I_const = 5
 I_const = 5
-size = 3
+size = 100
 path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
 
 logFile = "since_test2.log"
@@ -29,7 +29,7 @@ for id in range(size):
             Data.append([1,id,ts + i]) # p(x) & q(x) occur at same ts together
     
 test_description = 'Satisfactions here'
-test(path,test_description,Data, datFile, logFile, I_const,I_const,-1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_const,I_const,-1,False)
 
 # Second test(s): No satisfactions, random distance (but no equal 5)
 Data = []
@@ -43,7 +43,7 @@ for id in range(size):
         Data.append([1,id,ts + random.randint(6,15)]) #after intervall
 
 test_description = 'No satisfactions, "randomly" wrapped'
-test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
+test_binary(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
 
 #third test case: not satisfied but distance between p & q is constant 5
 Data = []
@@ -54,7 +54,7 @@ for id in range(size):
     Data.append([1,id,ts + I_const])
 
 test_description = 'Never satisfied but constant distance of I_const, "randomly" wrapped'
-test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
+test_binary(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
 
 
 # 4h test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
@@ -67,4 +67,4 @@ for i in range(size):
     Data.append([signature,id,ts])
 
 test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "randomly" wrapped'
-test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
+test_binary(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)

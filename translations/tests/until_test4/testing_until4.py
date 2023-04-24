@@ -1,7 +1,7 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import test
+from myLib import test_binary
 
 
 
@@ -38,7 +38,7 @@ for i in range(size):
             Data.append([1,id,ts - (dist)])   # p(x) & q(x) occur at same ts together 
         
 test_description = 'Test where each id satisfies the Formula, no wrapping'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
 
 #Case2: Never satisfied, "before" intervall:
 Data = []
@@ -51,7 +51,7 @@ for id in range(size):
         Data.append([1,id,ts - (dist+1)])
 
 test_description = 'Each P(x) chain stops before being in the intervall, with "random" wrapping'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 #Case3: Never satisfied, "after" intervall:
 Data = []
@@ -64,4 +64,4 @@ for id in range(size):
         Data.append([1,id,ts + dist])
 
 test_description = 'Each P(x) chain starts outside the intervall (again never gets satisfied), "total wrapping'
-test(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
+test_binary(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
