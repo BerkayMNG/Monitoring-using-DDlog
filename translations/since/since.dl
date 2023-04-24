@@ -21,6 +21,10 @@ relation Data_in(ap:s32, tp:s32, ts:s32, id:s32)
 relation Tuple_in(ap:s32, tp:s32, ts:s32, id:s32)
 relation Tuple_since(ap:s32, tp:s32, ts:s32, id:s32)
 
+//need to temporarily store P's temporarily
+relation P_cache(tp:s32, ts:s32, id:s32)
+
+
 //output
 output relation Satisfied(ap:s32, ts:s32, id:s32)
 
@@ -54,19 +58,32 @@ Data_in(tp_new, tp_old,ts_old,id) :- Data_in-1(ap_old, tp_old,ts_old,id), Timest
 Data_in(tp_new, tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Data_in(ap_old, tp_old,ts_old,id), Intervall(min,max),
                                         ts_new - ts_old <= max, ts_new-ts_old >= min, ap_old == tp_new-1.
 
+
+/*
+P_cache just stores the P's temporary as long as needed. P_cache is only needed beause of the third rule in tuple_since,
+because we (sometimes) need to know wheter a P of some id occured in the last timepoint. We unfortunately cannot use 
+"not Tuple_since(tp-1,_,_,id)" or "not Tuple_since-1(tp-1,_,_,id)"  because we cannot use the negation in a recursive rule.
+*/
+P_cache(tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id).
+P_cache(tp_new-1,ts_old,id) :- Timestamp'(tp_new,ts_new), P_cache-1(tp_new-1,ts_old,id).
+
 /*
 First rule: Get all old tuples which might be needed in the analysis, didn't fall out at some analysis points
-Second rule & third rule:   Q doesn't replace old values and this implementation will always hold earliest tuple satisfying SINCE
+Second,third and foruth rule:   Q doesn't replace old values and this implementation will always hold earliest tuple satisfying SINCE
 
 A bit more precise:
 -   2nd rule does not replace old Q's still valid because there isn't a corresponding P anyway ("Since chain is broken")
     and simultaneously doesn't miss to put in Q to tuple_since when needed ("start of Since chain")
 
--   3rd rule "updates the chain" (i.e. is temporary Since chain still relevant at current analysis point?)
+-   A special case where 2nd rule alone produces wrong results- when P(tp,id) and Q(tp,id) both occur but 
+    there is no Q in tuple_since yet. 2nd rule alone would therefore not start the "chain", even though it should
+
+-   3rd rule "updates the chain"
 */
 Tuple_since(ap,tp,ts,id) :- Tuple_since-1(ap,tp,ts,id), Timestamp'(tp_new,ts_new), 
                                 Intervall(min,max), ts_new - ts <= max, tp_new -1 == ap.
-Tuple_since(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), not P'(tp,id).
+Tuple_since(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), not P_cache(tp,_,id).
+Tuple_since(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), not P_cache(tp-1,_,id).
 Tuple_since(tp_new,tp_old,ts_old,id) :- Timestamp'(tp_new, ts_new), P'(tp_new,id),Tuple_since(tp_new-1,tp_old,ts_old,id),
                                         Intervall(min,max), ts_new-ts_old <= max.
 
@@ -76,19 +93,3 @@ Output like VeriMon
 Tuple_in(ap,tp,ts,id) :- Data_in(ap,tp,ts,id), Tuple_since(ap, tp,ts,id).
 Satisfied(ap,ts_new,id) :- Satisfied-1(ap,ts_new,id).
 Satisfied(ap,ts_new,id) :- Tuple_in(ap,tp,ts,id), Timestamp'(ap,ts_new).
-
-/*
-Check it on: 
-https://traytel.bitbucket.io/verimon/
-
-signature:          p(x:int)
-                    q(x:int)
-
-MFOTL formula:      q(x) SINCE[2,4] p(x)
-
-log:                @1 q(1) q(2) q(3)
-                    @2 p(2) p(3)
-                    @3 p(2) p(3) q(1) q(2)
-                    @7 p(1)
-
-*/
