@@ -1,0 +1,23 @@
+start;
+insert Intervall(0,4);
+insert Value(3);
+insert Viol_or_sat(-1);
+commit;
+start;
+insert Timestamp(0,1);
+insert P(0,3);
+insert P(0,2);
+insert P(0,5);
+insert Timestamp(1,2);
+insert P(1,6);
+insert P(1,3);
+insert P(1,6);
+insert Timestamp(2,2);
+insert P(2,6);
+insert Timestamp(3,3);
+insert P(3,6);
+insert Timestamp(4,3);
+insert P(4,4);
+insert P(4,6);
+commit dump_changes;
+
