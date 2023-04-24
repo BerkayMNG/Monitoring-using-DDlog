@@ -1,11 +1,7 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import runTest_since
-
-def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
-    print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_since(cat, Data, datFile, logFile, I_min,I_max)
+from myLib import test
     
 
 
@@ -14,7 +10,8 @@ def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
 #Formula is P(x) SINCE[0,3] Q(x)
 I_min = 0
 I_max = 3
-size = 100
+size = 5
+path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
 
 logFile = "since_test1.log"
 datFile = "since_test1.dat"
@@ -35,15 +32,15 @@ for id in range(size):
     chainlength = random.randint(I_min, I_max)
     Data.append([2,id,ts])
     for dist in range(chainlength):
-        Data.append([1,id,ts + (dist+1)])
+        Data.append([1,id,ts - (dist+1)])
 
 #special case where we have @ts p(x) q(x) (should be still satisfied since I_min == 0)
 ts = ts + random.randint(0,3)
 Data.append([2,size,ts])
 Data.append([1,size,ts])
 
-test_description = 'Test where each id satisfies the Formula'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Test where each id satisfies the Formula, completely wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
 
 
 # Second test(s): No satisfactions- only possible if there is no q(x)
@@ -53,8 +50,8 @@ for id in range(size):
     ts = ts + random.randint(0,3)
     Data.append([1,id,ts])
 
-test_description = 'Test where no id is satisfied, no q(x) occur'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Test where no id is satisfied, no q(x) occur,"randomly" wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
 
 # Third test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
 Data = []
@@ -65,7 +62,7 @@ for i in range(size):
     signature = random.randint(1,2)
     Data.append([signature,id,ts])
 
-test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "randomly" wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 print()

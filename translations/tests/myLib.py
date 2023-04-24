@@ -190,8 +190,8 @@ def compare(fileDDlog:str, FileLMonPoly:str):
             
     #Uncomment below code if you want to check that output is correct but may be out of order
 
-    #DataDDlog.sort(key=lambda x: (x[0],x[2]))
-    #DataMonPoly.sort(key=lambda x: (x[0],x[2]))
+    DataDDlog.sort(key=lambda x: (x[0],x[2]))
+    DataMonPoly.sort(key=lambda x: (x[0],x[2]))
     bool = (DataMonPoly == DataDDlog)
     return bool
 
@@ -214,20 +214,20 @@ def gen_tests_binary(Data:str,nameDat:str, nameLog:str, batchSize:int, min:int, 
     fileDat.close()
 
 
-    Data = format_generator_binary(Data,1,wrapSize,vary)
+    Data = format_generator_binary(Data,wrapSize,vary)
     logFile_generator(Data,nameLog,"w")
     datFile_generator(Data,nameDat,batchSize,"a")
 
 
-def runTest(cat,path,Data,datFile,logFile,min,max):
+def runTest_binary(path:str, Data:list, datFile:str, logFile:str, min:int, max:int, wrapSize:int, vary:bool):
     for batchsize in [1,5,10]:
-        gen_tests_binary(cat,Data, datFile,logFile, batchsize, min, max)
+        gen_tests_binary(Data, datFile,logFile, batchsize, min, max,wrapSize, vary)
         logFile_prefix = logFile[:-4]
 
         #We don't compile the programm for each intervall & testcase since this uses a lot of memory- instead just provide the intervall as input
         #in the original translation (/Monitoring-using-DDlog/translations) 
         os.system(path + " " + datFile + " > outputDDlog.txt")
-        os.system("monpoly -sig " + logFile_prefix+ ".sig -formula " + logFile_prefix + ".mfotl -log " + logFile_prefix+ ".log -nonewlastts  > outputMonPoly.txt")
+        os.system("monpoly -sig " + logFile_prefix+ ".sig -formula " + logFile_prefix + ".mfotl -log " + logFile_prefix+ ".log  > outputMonPoly.txt")
         passed_this_batchsize = compare(fileDDlog="outputDDlog.txt", FileLMonPoly="outputMonPoly.txt")
         if(not passed_this_batchsize):
             
@@ -241,11 +241,17 @@ def runTest(cat,path,Data,datFile,logFile,min,max):
         os.system("rm outputDDlog.txt")
         os.system("rm outputMonPoly.txt")
 
-def runTest_since(cat,Data, datFile, logFile, min, max):
+
+def test(path,test_description, Data, datFile, logFile, I_min,I_max,wrapSize,var):
+    print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
+    runTest_binary(path,Data, datFile, logFile, I_min,I_max,wrapSize,var)
+
+
+def runTest_since(Data:list, datFile:str, logFile:str, min:int, max:int, wrapSize:int, vary:bool):
     path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
-    runTest(cat,path,Data,datFile,logFile,min,max)
+    runTest_binary(path, Data, datFile,logFile, min, max,wrapSize, vary)
 
-
-def runTest_until(cat,Data, datFile, logFile, min, max):
+def runTest_until(Data:list, datFile:str, logFile:str, min:int, max:int, wrapSize:int, vary:bool):
     path = "/home/berkay/Monitoring-using-DDlog/translations/until/until_ddlog/target/release/until_cli <"
-    runTest(cat,path,Data,datFile,logFile,min,max)
+    runTest_binary(path, Data, datFile,logFile, min, max,wrapSize, vary)
+

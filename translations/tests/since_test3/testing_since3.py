@@ -1,15 +1,13 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import runTest_since
-
-def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
-    print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_since(cat,Data, datFile, logFile, I_min,I_max)
+from myLib import test
 
 #Formula is P(x) SINCE[0,0] Q(x), So I_min=I_max = I_const = 0
 I_const = 0
 size = 100
+path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
+
 logFile = "since_test3.log"
 datFile = "since_test3.dat"
 
@@ -29,8 +27,8 @@ for id in range(size):
     else:
         Data.append([1,id,ts + ts+11]) # @ts p(x)  q(x),  also  satisfied
     
-test_description = 'All satisfied'
-test(0,test_description,Data, datFile, logFile, I_const,I_const)
+test_description = 'All satisfied, "randomly" wrapped'
+test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
 
 # Second test(s): No satisfactions- only possible if no q(x)
 Data = []
@@ -38,8 +36,8 @@ ts = I_const
 for id in range(size):
     ts = ts + random.randint(0,3)
     Data.append([1,id,ts])
-test_description = 'No satisfactions'
-test(0,test_description,Data, datFile, logFile, I_const,I_const)
+test_description = 'No satisfactions,  "randomly" wrapped'
+test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
 
 
 
@@ -52,5 +50,5 @@ for i in range(size):
     signature = random.randint(1,2)
     Data.append([signature,id,ts])
 
-test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
-test(0,test_description,Data, datFile, logFile, I_const,I_const)
+test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "randomly" wrapped'
+test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)

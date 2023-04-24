@@ -1,16 +1,13 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import runTest_since
-
-def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
-    print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_since(cat,Data, datFile, logFile, I_min,I_max)
+from myLib import test
 
 #Formula is P(x) SINCE[20,30] Q(x)
 I_min = 20
 I_max = 30
-size = 90
+size = 100
+path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
 
 logFile = "since_test4.log"
 datFile = "since_test4.dat"
@@ -33,8 +30,9 @@ for id in range(size):
         else:
             Data.append([1,id,ts + (dist)])   # p(x) & q(x) never occur at same ts together 
 
-test_description = 'Test where each id satisfies the Formula'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Test where each id satisfies the Formula, "randomly" wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,4,True)
+
 
 
 # Second test(s): No satisfactions, chain stops before lower bound of intervall is reached
@@ -51,8 +49,8 @@ for id in range(size):
         else:
             Data.append([1,id,ts + (dist)])   # p(x) & q(x) never occur at same ts together 
 
-test_description = 'Test where a "chain" stops before being satisfied'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Test where a "chain" stops before being satisfied, never wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
 
 # Third test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
 Data = []
@@ -63,5 +61,5 @@ for i in range(size):
     signature = random.randint(1,2)
     Data.append([signature,id,ts])
 
-test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, randomly wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)

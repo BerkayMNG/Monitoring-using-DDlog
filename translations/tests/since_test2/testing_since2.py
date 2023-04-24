@@ -1,15 +1,13 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import runTest_since
-
-def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
-    print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_since(cat,Data, datFile, logFile, I_min,I_max)
+from myLib import test
 
 #Formula is P(x) SINCE[5,5] Q(x), So I_min=I_max = I_const = 5
 I_const = 5
 size = 3
+path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
+
 logFile = "since_test2.log"
 datFile = "since_test2.dat"
 
@@ -31,7 +29,7 @@ for id in range(size):
             Data.append([1,id,ts + i]) # p(x) & q(x) occur at same ts together
     
 test_description = 'Satisfactions here'
-test(0,test_description,Data, datFile, logFile, I_const,I_const)
+test(path,test_description,Data, datFile, logFile, I_const,I_const,-1,False)
 
 # Second test(s): No satisfactions, random distance (but no equal 5)
 Data = []
@@ -44,9 +42,8 @@ for id in range(size):
     else:
         Data.append([1,id,ts + random.randint(6,15)]) #after intervall
 
-test_description = 'No satisfactions'
-test(0,test_description,Data, datFile, logFile, I_const,I_const)
-
+test_description = 'No satisfactions, "randomly" wrapped'
+test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
 
 #third test case: not satisfied but distance between p & q is constant 5
 Data = []
@@ -56,8 +53,8 @@ for id in range(size):
     Data.append([2,id,ts])
     Data.append([1,id,ts + I_const])
 
-test_description = 'Never satisfied but constant distance of I_const'
-test(0,test_description,Data, datFile, logFile, I_const,I_const)
+test_description = 'Never satisfied but constant distance of I_const, "randomly" wrapped'
+test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)
 
 
 # 4h test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
@@ -69,5 +66,5 @@ for i in range(size):
     signature = random.randint(1,2)
     Data.append([signature,id,ts])
 
-test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
-test(0,test_description,Data, datFile, logFile, I_const,I_const)
+test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "randomly" wrapped'
+test(path,test_description,Data, datFile, logFile, I_const,I_const,4,True)

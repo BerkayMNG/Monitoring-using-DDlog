@@ -1,11 +1,7 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import runTest_until
-
-def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
-    print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_until(cat,Data, datFile, logFile, I_min,I_max)
+from myLib import test
     
 
 
@@ -13,6 +9,7 @@ def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
 I_min = 5
 I_max = 5
 size = 200
+path = "/home/berkay/Monitoring-using-DDlog/translations/until/until_ddlog/target/release/until_cli <"
 
 logFile = "until_test2.log"
 datFile = "until_test2.dat"
@@ -30,15 +27,15 @@ ts = I_max
 for i in range(size):
     id = random.randint(0,5)
     Data.append([1,id,ts])
-    ts = ts + I_max
+    ts = ts + I_max + 1
     Data.append([2,id,ts])
 
-
 test_description = 'Test where each id satisfies the Formula, no wrapping'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
 
 
 
+# before or after interval there is a P matching to a Q - so never satisfied
 Data = []
 I_const = I_max
 ts = I_const
@@ -55,7 +52,7 @@ for id in range(size):
     Data.append([2,id,ts])
 
 test_description = 'Never satisfied, no wrapping'
-test(0,test_description,Data, datFile, logFile, I_const,I_const)
+test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
 
 
 #randomly satisfied or not, "wrap" events of same ts to same tp
@@ -69,7 +66,7 @@ for i in range(3*size):
 
 
 test_description = 'Random- might or might not be satisfied. Wrapped events'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
 
 
 

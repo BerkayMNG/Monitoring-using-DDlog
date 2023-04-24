@@ -1,11 +1,7 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import runTest_until
-
-def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
-    print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_until(cat,Data, datFile, logFile, I_min,I_max)
+from myLib import test
     
 
 
@@ -13,6 +9,7 @@ def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
 I_min = 0
 I_max = 3
 size = 200
+path = "/home/berkay/Monitoring-using-DDlog/translations/until/until_ddlog/target/release/until_cli <"
 
 logFile = "until_test1.log"
 datFile = "until_test1.dat"
@@ -34,7 +31,7 @@ print()
 Data = []
 ts = I_max
 for i in range(size):
-    id = random.randint(0,10)
+    id = random.randint(0,4)
     ts = ts + I_max + 1
     chainlength = random.randint(I_min, I_max)
     coin = random.randint(0,1)
@@ -52,8 +49,9 @@ ts = ts + I_max + 1
 Data.append([2,size,ts])
 Data.append([1,size,ts])
 
-test_description = 'Test where each id satisfies the Formula'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Test where each id satisfies the Formula, all wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
+
 
 
 # Case2: No satisfaction. i.e. no q's
@@ -64,8 +62,9 @@ for i in range(size):
     ts = ts + random.randint(0, I_max-1)
     Data.append([1,id,ts])
 
-test_description = 'Test with no q(x), so formula gets never satisfied'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Test with no q(x), so formula gets never satisfied, "random" wrapping'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,4,True)
+
 
 
 # Third test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
@@ -77,14 +76,11 @@ for i in range(size):
     signature = random.randint(1,2)
     Data.append([signature,id,ts])
 
-test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
-test(0,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "random" wrapped' 
+test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
-print()
-print()
-print()
-print('\x1b[6;30;47m'+ 'Second Testblock: All events at the same timestamp happen at same timepoint'  + '\x1b[0m')
-print()
+
+
 
 #basically repeat above, slightly modify
 Data = []
@@ -102,8 +98,9 @@ for i in range(size):
         for dist in range(chainlength):
             Data.append([1,id,ts + dist])
         Data.append([1,id,ts + chainlength])
-test_description = 'Test where each id satisfies the Formula'
-test(1,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Test where each id satisfies the Formula, complete wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,-1,False)
+
 
 
 
@@ -113,8 +110,9 @@ for i in range(size):
     id = random.randint(0,10)
     ts = ts + random.randint(0, I_max-1)
     Data.append([1,id,ts])
-test_description = 'Test with no q(x), so formula gets never satisfied'
-test(1,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Test with no q(x), so formula gets never satisfied, not wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,1,False)
+
 
 
 # Third test case: random input (mainly here to check wheter output of ddlog matches with MonPoly's output)
@@ -126,5 +124,5 @@ for i in range(size):
     signature = random.randint(1,2)
     Data.append([signature,id,ts])
 
-test_description = 'Random input, checks wheter DDlog produces same output as MonPoly'
-test(1,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Random input, checks wheter DDlog produces same output as MonPoly, "random" wrapped'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)

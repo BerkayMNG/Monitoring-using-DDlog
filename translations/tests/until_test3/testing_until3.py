@@ -1,11 +1,8 @@
 import random
 import sys
 sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
-from myLib import runTest_until
+from myLib import test
 
-def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
-    print('\x1b[6;30;47m' + test_description + ' \x1b[0m')
-    runTest_until(cat,Data, datFile, logFile, I_min,I_max)
     
 
 
@@ -13,7 +10,7 @@ def test(cat,test_description, Data, datFile, logFile, I_min,I_max):
 I_min = 0
 I_max = 0
 size = 200
-
+path = "/home/berkay/Monitoring-using-DDlog/translations/until/until_ddlog/target/release/until_cli <"
 logFile = "until_test3.log"
 datFile = "until_test3.dat"
 
@@ -29,17 +26,18 @@ Data = []
 ts = I_max
 for i in range(size):
     if(i < size/2):
+        #P(x) Q(x) at same ts (and tp)
         id = random.randint(0,5)
         Data.append([1,id,ts])
         Data.append([2,id,ts])
         ts =  ts + random.randint(0,3)
     else:
+        # Single Q's satisfy
         Data.append([2,id,ts])
         ts =  ts + random.randint(0,3)
 
-
-test_description = 'Test where each id satisfies the Formula, with wrapping'
-test(1,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Test where each id satisfies the Formula, with "random" wrapping'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 
 # Case2: No satisfaction, only possible when no q(x) occurs
@@ -51,8 +49,8 @@ for id in range(size):
     ts = ts + random.randint(0,3)
     Data.append([1,id,ts])
 
-test_description = 'No satisfactions, with wrapping'
-test(1,test_description,Data, datFile, logFile, I_const,I_const)
+test_description = 'No satisfactions, with "random" wrapping'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 
 #random
@@ -64,9 +62,8 @@ for i in range(size):
     signature = random.randint(1,2)
     Data.append([signature,id,ts])
 
-
-test_description = 'Random- might or might not be satisfied, with wrapping'
-test(1,test_description,Data, datFile, logFile, I_min,I_max)
+test_description = 'Random- might or might not be satisfied, with "random" wrapping'
+test(path,test_description,Data, datFile, logFile, I_min,I_max,3,True)
 
 
 
