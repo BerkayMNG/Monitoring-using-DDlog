@@ -1,5 +1,7 @@
 //Formula NEXT[2,4] P(x)
 
+//Did not test this Formula with test examples
+
 //input 
 input stream Timestamp(tp:s32, ts:s32)
 input stream P(tp:s32, id:s32)

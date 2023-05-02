@@ -4,15 +4,13 @@
 input stream Timestamp(tp:s32, ts:s32)
 input stream P(tp:s32, id:s32)
 
-relation Intervall(min:s32, max:s32)
-Intervall(2,4) :- .
+input relation Intervall(min:s32, max:s32)
+input relation Value(id:s32)
+input relation Viol_or_sat(id:s32)
 
 //Auxiliary relation
 relation Cache(tp:s32, ts:s32, id:s32)
-
-relation Value(id:s32)
-Value(1) :- .
-
+relation Satisfied_cache(tp:s32, ts:s32, id:s32) //only needed for testing purposes
 
 //output
 output relation Satisfied(tp:s32, ts:s32, id:s32)
@@ -27,9 +25,13 @@ Cache(tp_old,ts_old,id) :- Cache-1(tp_old,ts_old,id), Timestamp'(tp_new,ts_new),
                             tp_old == tp_new -1.
 
 
-Satisfied(tp_new,ts_new,id) :- Cache(tp_old, ts_old, id), Timestamp'(tp_new,ts_new), 
+Satisfied_cache(tp_new,ts_new,id) :- Cache(tp_old, ts_old, id), Timestamp'(tp_new,ts_new), 
                                 Intervall(min,max), Value(id),
                                 ts_new - ts_old <= max, ts_new - ts_old >= min, tp_old == tp_new-1.
 
+Satisfied(tp,ts,id) :- Satisfied-1(tp,ts,id).
+Satisfied(tp,ts,id) :- Satisfied_cache(tp,ts,id), Viol_or_sat(outpt), outpt == 1.
+
 //corresponds to negate in VeriMon
-Violations(tp,ts,id) :- Timestamp'(tp,ts), Value(id), not Satisfied(tp,_,id).
+Violations(tp,ts,id) :- Violations-1(tp,ts,id).
+Violations(tp,ts,id) :- Timestamp'(tp,ts), Value(id), not Satisfied_cache(tp,_,id),Viol_or_sat(outpt), outpt == -1,.

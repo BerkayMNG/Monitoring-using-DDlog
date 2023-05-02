@@ -3,7 +3,9 @@
 REMARK:
 
 For a better overview (with less comments) check the files prev_formula1.dl &
-prev_formula2.dl under the same directory. 
+prev_formula2.dl under the same directory. However, the described files were used 
+for testing, so they were specifically designed to not look at a fixed formula but 
+to allow "variation" (which intervall, which value, analysing violations or satisfaction etc)
 */
 
 

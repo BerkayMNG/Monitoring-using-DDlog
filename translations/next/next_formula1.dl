@@ -1,14 +1,19 @@
 //Formula NEXT[2,4] P(1)
+
+
+
 //input 
 input stream Timestamp(tp:s32, ts:s32)
 input stream P(tp:s32, id:s32)
 
 //Auxiliary relation
-relation Intervall(min:s32, max:s32)
+input relation Intervall(min:s32, max:s32)
+input relation Value(id:s32)
+// -1 for outputing violation, 1 for satisfied
+input relation Viol_or_sat(id:s32)
+
 relation Cache(tp:s32, ts:s32)
-relation Value(id:s32)
-Intervall(2,4) :- .
-Value(1) :- .
+
 
 //output
 output relation Satisfied(tp:s32, ts:s32, id:s32)
@@ -20,14 +25,15 @@ Cache(tp_old,ts_old) :- Cache-1(tp_old,ts_old), Timestamp'(tp_new,ts_new), Inter
                         tp_old == tp_new-1.
 
 
+Satisfied(tp,ts,id) :- Satisfied-1(tp,ts,id).
 Satisfied(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
-                                Intervall(min,max), Value(id), 
+                                Intervall(min,max), Value(id), Viol_or_sat(outpt), outpt == 1, 
                                 ts_new - ts_old <= max, ts_new - ts_old >= min, tp_old == tp_new-1.
 
-
+Violations(tp,ts,id) :- Violations-1(tp,ts,id).
 Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old), Value(id), Timestamp'(tp_new, ts_new), not P'(tp_new,id),
-                                tp_old == tp_new-1.
+                                tp_old == tp_new-1, Viol_or_sat(outpt), outpt == -1.
 Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
-                                Intervall(min,max), Value(id), ts_new - ts_old > max, tp_old == tp_new-1.
+                                Intervall(min,max), Value(id), ts_new - ts_old > max, tp_old == tp_new-1, Viol_or_sat(outpt), outpt == -1.
 Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
-                                Intervall(min,max), Value(id), ts_new - ts_old < min, tp_old == tp_new-1.
+                                Intervall(min,max), Value(id), ts_new - ts_old < min, tp_old == tp_new-1, Viol_or_sat(outpt), outpt == -1.

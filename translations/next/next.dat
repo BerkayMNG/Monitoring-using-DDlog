@@ -1,4 +1,10 @@
 start;
+insert Intervall(2,3);
+insert Value(1);
+insert Viol_or_satis(1);
+commit;
+
+start;
 insert Timestamp(0,1);
 insert P(0,2);
 commit;

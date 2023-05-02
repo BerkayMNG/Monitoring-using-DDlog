@@ -1,0 +1,11 @@
+input stream Timestamp(tp:u32,ts:u32)
+input stream P(tp:u32, id:u32)
+
+input relation Intervall(min:u32,max:u32)
+
+output relation Data_cache(ap:u32,tp:u32,ts:u32,id:u32)
+
+
+Data_cache(tp_new,tp,ts_old,id) :- Data_cache-1(_,tp,ts_old,id), Timestamp'(tp_new,ts_new),
+                                    Intervall(min,max), ts_new-ts_old <= max.
+Data_cache(tp,tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id).

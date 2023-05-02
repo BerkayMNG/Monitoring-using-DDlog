@@ -27,7 +27,7 @@ which will be fed into the corresponding programs as input. Since it is desirabl
                 Do not use vary = True and wrapSize = -1 simultaneously
 :type vary:     bool
 
-:return Data_new:    format is [(timestamp, [class,identifier, timestamp])]. For each element the timestamp of the first element of the tuple matches (or should match) with the timestamp of the array of 
+:return Data_new:    format is [(timestamp, [[class,identifier, timestamp]])]. For each element the timestamp of the first element of the tuple matches (or should match) with the timestamp of the array of 
                      the second tuple-element
 :trype list
 """
@@ -229,7 +229,7 @@ def runTest_binary(path:str, Data:list, datFile:str, logFile:str, min:int, max:i
         #We don't compile the programm for each intervall & testcase since this uses a lot of memory- instead just provide the intervall as input
         #in the original translation (/Monitoring-using-DDlog/translations) 
         os.system(path + " " + datFile + " > outputDDlog.txt")
-        os.system("monpoly -sig " + logFile_prefix+ ".sig -formula " + logFile_prefix + ".mfotl -log " + logFile_prefix+ ".log -nonewlastts -verified > outputMonPoly.txt")
+        os.system("monpoly -sig " + logFile_prefix+ ".sig -formula " + logFile_prefix + ".mfotl -log " + logFile_prefix+ ".log -nonewlastts  > outputMonPoly.txt")
         passed_this_batchsize = compare_binary(fileDDlog="outputDDlog.txt", FileLMonPoly="outputMonPoly.txt")
         if(not passed_this_batchsize):
             

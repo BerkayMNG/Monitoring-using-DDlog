@@ -1,6 +1,8 @@
 /*
 Below program for formula: PREV[2,4] P(x)
 Here VeriMon cannot negate, so no "violations"
+
+Did not test this Formula with test examples
 */
 
 //input

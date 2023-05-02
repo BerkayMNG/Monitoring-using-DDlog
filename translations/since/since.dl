@@ -1,7 +1,5 @@
 //Formula P(x) SINCE[min,max] Q(x)
 
-//This program mimics the sliding window algorithm
-
 //input
 input stream Timestamp(tp:s32, ts:s32)
 input stream P(tp:s32, id:s32)
@@ -15,81 +13,44 @@ Intervall(2,4) :- .
 */
 
 //Auxiliary
-//ap stands for analysis point (at which timepoint we are currently making the analysis)
-relation Data_prev(ap:s32, tp:s32, ts:s32, id:s32)
-relation Data_in(ap:s32, tp:s32, ts:s32, id:s32)
-relation Tuple_in(ap:s32, tp:s32, ts:s32, id:s32)
-relation Tuple_since(ap:s32, tp:s32, ts:s32, id:s32)
-
-//need to temporarily store P's temporarily
-relation P_cache(tp:s32, ts:s32, id:s32)
+relation P_cache(tp:s32,ts:s32,id:s32)
+relation Q_cache(tp:s32,ts:s32,id:s32)
+relation Tuple_chain(ap:s32,tp:s32,ts:s32,id:s32)
 
 
 //output
 output relation Satisfied(ap:s32, ts:s32, id:s32)
 
-/*
-First rule: put in Data_prev if before intervall at current timepoint (=current analysispoint)
-Second rule: Since we are working with batches, we might still have valid tuples in Data_prev at later analysis points
-Third rule: Also need to consider valid tuples from last transaction
-*/
-//Data_prev(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), Intervall(min,max),
-                            //min > 0.
-Data_prev(tp_new,tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Timestamp'(tp_old,ts_old), Q'(tp_old,id), Intervall(min,max),
-                                        ts_new - ts_old < min, tp_old <= tp_new.
-Data_prev(tp_new,tp_old,ts_old,id) :- Data_prev-1(ap_old, tp_old,ts_old,id), Timestamp'(tp_new,ts_new), Intervall(min,max),
-                                        ts_new - ts_old < min, tp_old <= tp_new.
-
-/*
-First rule: special case if intervall is of the form [0,max]
-Second rule: state of Data_in at each analysispoint
-Third & fourth rule : Needed tuples from old transaction
-fifth rule: Extensions of Second rule -> In case intervalls lower bound is zero, all tuples land directly in Data_in (i.e.
-            newer analysis points of the same events)
-*/
-Data_in(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), Intervall(min,max),
-                            min == 0.
-Data_in(tp_new,tp_old,ts_old,id) :- Data_prev(ap_old,tp_old,ts_old,id), Timestamp'(tp_new,ts_new), Intervall(min,max),
-                                        ts_new - ts_old <= max, ts_new-ts_old >= min, ap_old <= tp_new.
-Data_in(tp_new, tp_old,ts_old,id) :- Data_prev-1(ap_old, tp_old,ts_old,id), Timestamp'(tp_new,ts_new), Intervall(min,max),
-                                        ts_new - ts_old <= max, ts_new-ts_old >= min, ap_old <= tp_new.
-Data_in(tp_new, tp_old,ts_old,id) :- Data_in-1(ap_old, tp_old,ts_old,id), Timestamp'(tp_new,ts_new), Intervall(min,max),
-                                        ts_new - ts_old <= max, ts_new-ts_old >= min, ap_old <= tp_new.
-Data_in(tp_new, tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Data_in(ap_old, tp_old,ts_old,id), Intervall(min,max),
-                                        ts_new - ts_old <= max, ts_new-ts_old >= min, ap_old == tp_new-1.
 
 
 /*
-P_cache just stores the P's temporary as long as needed. P_cache is only needed beause of the third rule in tuple_since,
-because we (sometimes) need to know wheter a P of some id occured in the last timepoint. We unfortunately cannot use 
-"not Tuple_since(tp-1,_,_,id)" or "not Tuple_since-1(tp-1,_,_,id)"  because we cannot use the negation in a recursive rule.
+Q_cache stores all Q's which did not fall out of the intervall yet. Considering the SLW algorithm, Q_cache
+is in some sense the untion of Data_in and Data_cache.
+
+P_cache stores the P streams which might be needed later. (Cannot retrieve this information only from Tuple_chain,
+since it would be necessary to use a antijoin in Tuple_chain rule with itself- which DDlog cannot compute (which also makes sense))
 */
+Q_cache(tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Q_cache-1(tp_old,ts_old,id), Intervall(min,max), tp_new - ts_old <= max. 
+Q_cache(tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id).
+
+P_cache(tp_new-1,ts_old,id) :- Timestamp'(tp_new,ts_new), P_cache-1(tp_new-1,ts_old,id), Intervall(min,max), tp_new - ts_old <= max.
 P_cache(tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id).
-P_cache(tp_new-1,ts_old,id) :- Timestamp'(tp_new,ts_new), P_cache-1(tp_new-1,ts_old,id).
+
 
 /*
-First rule: Get all old tuples which might be needed in the analysis, didn't fall out at some analysis points
-Second,third and foruth rule:   Q doesn't replace old values and this implementation will always hold earliest tuple satisfying SINCE
-
-A bit more precise:
--   2nd rule does not replace old Q's still valid because there isn't a corresponding P anyway ("Since chain is broken")
-    and simultaneously doesn't miss to put in Q to tuple_since when needed ("start of Since chain")
-
--   A special case where 2nd rule alone produces wrong results- when P(tp,id) and Q(tp,id) both occur but 
-    there is no Q in tuple_since yet. 2nd rule alone would therefore not start the "chain", even though it should
-
--   3rd rule "updates the chain"
+First rule: Keep latest information, which might me needed to update the chain
+Second & third rule: Q will be put at the start of the chain if and only if there isn't already a longer chain with the same id
+fourth rule: update the chain- 
 */
-Tuple_since(ap,tp,ts,id) :- Tuple_since-1(ap,tp,ts,id), Timestamp'(tp_new,ts_new), 
-                                Intervall(min,max), ts_new - ts <= max, tp_new -1 == ap.
-Tuple_since(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), not P_cache(tp,_,id).
-Tuple_since(tp,tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id), not P_cache(tp-1,_,id).
-Tuple_since(tp_new,tp_old,ts_old,id) :- Timestamp'(tp_new, ts_new), P'(tp_new,id),Tuple_since(tp_new-1,tp_old,ts_old,id),
+Tuple_chain(tp_new-1,tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Tuple_chain-1(tp_new-1,tp_old,ts_old,id),
+                                            Intervall(min,max), ts_new - ts_old <= max.
+Tuple_chain(tp_new,tp_new,ts_new,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new,id).
+Tuple_chain(tp_new,tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), P'(tp_new,id), Tuple_chain(tp_new-1,tp_old,ts_old,id),
                                         Intervall(min,max), ts_new-ts_old <= max.
 
-/*
-Output like VeriMon
-*/
-Tuple_in(ap,tp,ts,id) :- Data_in(ap,tp,ts,id), Tuple_since(ap, tp,ts,id).
+
+
+
+//Output like VeriMon
 Satisfied(ap,ts_new,id) :- Satisfied-1(ap,ts_new,id).
-Satisfied(ap,ts_new,id) :- Tuple_in(ap,tp,ts,id), Timestamp'(ap,ts_new).
+Satisfied(ap,ts_new,id) :- Tuple_chain(ap,tp,ts,id), Timestamp'(ap,ts_new), Intervall(min,max), ts_new - ts <= max, ts_new - ts >= min.
