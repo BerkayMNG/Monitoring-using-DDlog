@@ -1,14 +1,17 @@
-input stream Timestamp(tp:u32,ts:u32)
+input stream Timestamp(tp:u32, ts:s32)
 input stream P(tp:u32, id:u32)
 input stream Q(tp:u32, id:u32)
 
-input relation Intervall(min:u32,max:u32)
-relation Data_cache(ts:u32, id:u32)
-output relation Report(tp:u32, ts:u32, id:u32)
+relation Once_P(ts:s32, id:u32)
+relation Once_Q(ts:s32, id:u32)
+output relation Report(tp:u32, ts:s32, id:u32)
 
-//we want to cache here all P's which are not out of the "upper bound" of the intervall
-Data_cache(ts_old,id) :- Data_cache-1(ts_old,id), Timestamp'(tp_new,ts_new),
-                                    Intervall(min, max), ts_new-ts_old <= max.
-Data_cache(ts,id) :- Timestamp'(_,ts), P'(_,id).
+Once_P(ts, id)      :- Timestamp'(_, ts), P'(_, id).
+Once_P(ts_old, id)  :- Once_P-1(ts_old, id), Timestamp'(_, ts_new),
+                       ts_new - 10 <= ts_old, not P'(_, id).
 
-Report(tp, ts, id) :- Q'(tp, id), Data_cache(ts, id).
+Once_Q(ts, id)      :- Timestamp'(_, ts), Q'(_, id).
+Once_Q(ts_old, id)  :- Once_Q-1(ts_old, id), Timestamp'(_, ts_new),
+                       ts_new - 10 <= ts_old, not Q'(_, id).
+
+Report(tp, ts, id)  :- Timestamp'(tp, ts), Once_P(_, id), not Once_Q(_, id).

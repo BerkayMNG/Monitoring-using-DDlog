@@ -4,11 +4,9 @@ import matplotlib.pyplot as plt
 
 # Parameters
 SEED = 20230508
-REP = 1
-IV_LO = 0
-IV_HI = 10
-TOTAL_EVENTS = 10_000
-TP_PER_TS = [10, 20, 30, 40, 50, 60]
+REP = 3
+TOTAL_EVENTS = 20_000
+TP_PER_TS = [5, 10, 15, 20]
 EV_PER_TP = 10
 MAX_VALUE = 1_000_000_000
 PROGRAMS = ["no_batching", "batching", "batching_new"]
@@ -16,37 +14,37 @@ BATCH_SIZES = [1, 5]
 
 random.seed(SEED)
 
-Trace = list[tuple[int, list[int]]]
+Trace = list[tuple[int, list[tuple[str, int]]]]
 
 def input_generator(tp_per_ts: int) -> Trace:
-    num_ts = round(TOTAL_EVENTS / EV_PER_TP / tp_per_ts)
+    num_ts = round(TOTAL_EVENTS / 2 / EV_PER_TP / tp_per_ts)
     events = []
+    cache = []
     count = 0
     num_tp = 0
     for ts in range(num_ts):
         for tp in range(tp_per_ts):
-            curr_events = []
+            curr_events = [("Q", elem) for elem in cache]
+            cache.clear()
             for _ in range(EV_PER_TP):
-                curr_events.append(random.randint(0, MAX_VALUE))
-                count += 1
+                elem = random.randint(0, MAX_VALUE)
+                cache.append(elem)
+                curr_events.append(("P", elem))
             events.append((ts, curr_events))
+            count += len(curr_events)
             num_tp += 1
     print(f"generated {count} events across {num_ts} time-stamps, {num_tp} time-points")
     return events
 
 def file_generator(events: Trace, batch_size: int, filename: str):
     with open(filename, 'w') as file:
-        file.write("start;\n")
-        file.write(f"insert Intervall({IV_LO}, {IV_HI});\n")
-        file.write("commit dump_changes;\n\n")
-
         for batch_start in range(0, len(events), batch_size):
             file.write("start;\n")
             for tp in range(batch_start, min(batch_start + batch_size, len(events))):
                 ts, elems = events[tp]
                 file.write("insert Timestamp(" + str(tp) + ", " + str(ts) + ");\n")
-                for elem in elems:
-                    file.write("insert P(" + str(tp) + ", " + str(elem) + ");\n")
+                for rel, elem in elems:
+                    file.write("insert " + rel + "(" + str(tp) + ", " + str(elem) + ");\n")
             file.write("commit dump_changes;\n\n")
 
 def measure(program: str, tp_per_ts: int, batch_size: int) -> float:
