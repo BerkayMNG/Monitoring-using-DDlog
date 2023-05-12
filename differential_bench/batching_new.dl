@@ -6,7 +6,7 @@ relation Once_P_state(ts:s32, id:u32)
 relation Once_P(ap:u32, id:u32)
 relation Once_Q_state(ts:s32, id:u32)
 relation Once_Q(ap:u32, id:u32)
-output relation Report(ap:u32, ts:s32, id:u32)
+output relation Report(ap:u32, id:u32)
 
 Once_P(ap, id)           :- Timestamp'(tp, ts_old), P'(tp, id),
                             Timestamp'(ap, ts_new), ap >= tp, ts_new - 10 <= ts_old.
@@ -28,4 +28,4 @@ Once_Q_state(max_ts, id) :- Q'(tp, id), Timestamp'(tp, ts),
 Once_Q_state(ts_old, id) :- Once_Q_state-1(ts_old, id), Timestamp'(_, ts_new),
                             ts_new - 10 <= ts_old, not Q'(_, id).
 
-Report(ap, ts, id)       :- Timestamp'(ap, ts), Once_P(ap, id), not Once_Q(ap, id).
+Report(ap, id)           :- Once_P(ap, id), not Once_Q(ap, id).

@@ -4,7 +4,7 @@ input stream Q(tp:u32, id:u32)
 
 relation Once_P(ts:s32, id:u32)
 relation Once_Q(ts:s32, id:u32)
-output relation Report(tp:u32, ts:s32, id:u32)
+output relation Report(id:u32)
 
 Once_P(ts, id)      :- Timestamp'(_, ts), P'(_, id).
 Once_P(ts_old, id)  :- Once_P-1(ts_old, id), Timestamp'(_, ts_new),
@@ -14,4 +14,4 @@ Once_Q(ts, id)      :- Timestamp'(_, ts), Q'(_, id).
 Once_Q(ts_old, id)  :- Once_Q-1(ts_old, id), Timestamp'(_, ts_new),
                        ts_new - 10 <= ts_old, not Q'(_, id).
 
-Report(tp, ts, id)  :- Timestamp'(tp, ts), Once_P(_, id), not Once_Q(_, id).
+Report(id)          :- Once_P(_, id), not Once_Q(_, id).
