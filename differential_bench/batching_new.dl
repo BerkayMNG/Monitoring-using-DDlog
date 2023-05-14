@@ -1,0 +1,23 @@
+input stream Timestamp(tp:u32, ts:s32)
+input stream P(tp:u32, id:u32)
+input stream Q(tp:u32, id:u32)
+
+relation Once_P_state(id:u32)
+relation Once_P(ap:u32, id:u32)
+relation Once_Q_state(id:u32)
+relation Once_Q(ap:u32, id:u32)
+output relation Report(ap:u32, id:u32)
+
+Once_P(ap, id)       :- P'(tp, id), Timestamp'(ap, _), ap >= tp.
+Once_P(ap, id)       :- Once_P_state-1(id), Timestamp'(ap, _).
+
+Once_P_state(id)     :- P'(_, id).
+Once_P_state(id)     :- Once_P_state-1(id).
+
+Once_Q(ap, id)       :- Q'(tp, id), Timestamp'(ap, _), ap >= tp.
+Once_Q(ap, id)       :- Once_Q_state-1(id), Timestamp'(ap, _).
+
+Once_Q_state(id)     :- Q'(_, id).
+Once_Q_state(id)     :- Once_Q_state-1(id).
+
+Report(ap, id)       :- Once_P(ap, id), not Once_Q(ap, id).

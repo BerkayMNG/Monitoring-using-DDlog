@@ -1,136 +1,83 @@
 import random
-import os
+import subprocess
 import matplotlib.pyplot as plt
 
-def input_generator(numts:int, evr:int, lw:int, up:int):
+# Parameters
+SEED = 20230508
+REP = 3
+TOTAL_EVENTS = [2_000, 4_000, 6_000, 8_000]
+TP_PER_TS = 10
+EV_PER_TP = 2
+MAX_VALUE = 1_000_000_000
+PROGRAMS = ["no_batching", "batching", "batching_new"]
+BATCH_SIZES = [1, 5]
 
-    timestamps = []
+random.seed(SEED)
+
+Trace = list[tuple[int, list[tuple[str, int]]]]
+
+def input_generator(total_events: int) -> Trace:
+    num_ts = round(total_events / 2 / EV_PER_TP / TP_PER_TS)
     events = []
-    ts = 0
-    for it1 in range(numts):
-        ts = ts + random.randint(0,2*up)
-        timestamps.append(ts)
-        curr_events = []
-        for it2 in range(evr):
-            curr_events.append(random.randint(0,100))
-        events.append(curr_events)
+    cache = []
+    count = 0
+    num_tp = 0
+    for ts in range(num_ts):
+        for tp in range(TP_PER_TS):
+            curr_events = [("Q", elem) for elem in cache]
+            cache.clear()
+            for _ in range(EV_PER_TP):
+                elem = random.randint(0, MAX_VALUE)
+                cache.append(elem)
+                curr_events.append(("P", elem))
+            events.append((ts, curr_events))
+            count += len(curr_events)
+            num_tp += 1
+    print(f"generated {count} events across {num_ts} time-stamps, {num_tp} time-points")
+    return events
 
-    return timestamps,events
-
-def file_generator(timestamps:list,events:list,type:str, batchsize:int,lw:int, up:int,filename:str):
-
-    file = open(filename,"w")
-    file.write("start;\n")
-    file.write("insert Intervall(" + str(abs(lw)) + "," + str(up)  + ");\n")
-    file.write("commit dump_changes;\n\n")
-
-    if not (len(timestamps) == len(events)):
-        raise Exception("Size mismatch")
-    elif(type == "not batched"):
-        size = len(timestamps)
-        for tp in range(size):
+def file_generator(events: Trace, batch_size: int, filename: str):
+    with open(filename, 'w') as file:
+        for batch_start in range(0, len(events), batch_size):
             file.write("start;\n")
-            file.write("insert Timestamp(" + str(tp) + ", " + str(timestamps[tp]) + ");\n")
-            for ev in events[tp]:
-                file.write("insert P(" + str(tp) + ", " + str(ev) + ");\n")
-            file.write("commit dump_changes;\n")
-    elif(type == "batched"):
-        split_ts = [timestamps[i:i + batchsize] for i in range(0, len(timestamps), batchsize)]
-        split_events = [events[i:i + batchsize] for i in range(0, len(events), batchsize)]
-        new_size = len(split_ts)
-        for it1 in range(new_size):
-            file.write("start;\n")
-            for it2 in range(len(split_ts[it1])):
-                file.write("insert Timestamp(" + str(it1*batchsize+it2) + ", " + str(split_ts[it1][it2]) + ");\n")
-                for elem in split_events[it1][it2]:
-                    file.write("insert P(" + str(it1*batchsize+it2) + ", " + str(elem) + ");\n")
+            for tp in range(batch_start, min(batch_start + batch_size, len(events))):
+                ts, elems = events[tp]
+                file.write("insert Timestamp(" + str(tp) + ", " + str(ts) + ");\n")
+                for rel, elem in elems:
+                    file.write("insert " + rel + "(" + str(tp) + ", " + str(elem) + ");\n")
             file.write("commit dump_changes;\n\n")
 
-    else:
-        raise Exception("Please give a valid type, either 'batched' or 'not batched")
+def measure(program: str, total_events: int, batch_size: int) -> float:
+    print(f"{program}, batch size {batch_size}, {total_events} events")
+    INPUT_FILE = 'input.txt'
+    events = input_generator(total_events)
+    file_generator(events, batch_size, INPUT_FILE)
+    args = ["/usr/bin/time", "-f", "%e", f"./{program}_ddlog/target/release/{program}_cli"]
+    acc = 0.0
+    for _ in range(0, REP):
+        with open(INPUT_FILE, 'rb') as input_file:
+            proc = subprocess.run(args, stdin=input_file, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        proc.check_returncode()
+        elapsed = float(proc.stderr)
+        #print(f"{elapsed:.2f}")
+        acc += elapsed
+    avg = acc / REP
+    print(f"{avg:.2f}")
+    return avg
 
+def measure_series(program: str, batch_size: int) -> list[float]:
+    return [measure(program, x, batch_size) for x in TOTAL_EVENTS]
 
-
-
-def eval(filename:str):
-    sizes = []
-    times = []
-    lineNumber = 1
-    file1 = open(filename,"r")
-    for line in file1:
-        rtime, memusg = line.split(" ")
-        times.append(float(rtime))
-    file1.close()
-    return times,sizes
-
-def plot(input_size:list, runtimes:list,description:str):
-    plt.plot(input_size, runtimes, label = description)
-    plt.legend(loc='best')
-    plt.title("Comparision")
-    plt.xlabel("size")
-    plt.ylabel("time")
-    plt.show()
-    plt.savefig('comparision.png')
-
+def main():
+    for program in PROGRAMS:
+        bsz = [1] if program == "no_batching" else BATCH_SIZES
+        for batch_size in bsz:
+            label = f"{program}, batch size {batch_size}"
+            plt.plot(TOTAL_EVENTS, measure_series(program, batch_size), label=label)
+    plt.xlabel("tp/ts")
+    plt.ylabel("runtime [s]")
+    plt.figlegend()
+    plt.savefig("comparison.png")
 
 if __name__ == '__main__':
-    #choose Intervall here
-    lw = 5
-    up = 12
-    print("Intervall is: [" + str(lw) + ", " + str(up) + "]")
-
-    numts = [i*100 for i in range(1,100,5)]
-    rep = 10
-    evr = 2
-
-    runtimes = []
-    input_size = []
-    
-    table = open("table.txt", "w")
-
-    table.write("time,size\n")
-    table.write("No batching, differential evaluation:\n")
-    for ns in numts:
-        ts, ev = input_generator(ns,evr,lw,up)
-        file_generator(ts,ev,"not batched",1,lw,up,"no_batching.dat")
-
-        os.system("touch results.txt")
-        for i in range(0,rep):
-            os.system("/usr/bin/time -f'%e %M' --append --output=results.txt ./no_batching_ddlog/target/release/no_batching_cli < no_batching.dat > /dev/null")
-        times, _ = eval("results.txt")
-        os.system("rm results.txt")
-        rt = sum(times)/rep
-        sz = ns*evr
-        table.write( str(round(rt,3)) + " " + str(sz) + "\n")
-        runtimes.append(rt)
-        input_size.append(sz)
-    plot(input_size=input_size, runtimes=runtimes,description="no batching, differential evaluation")
-
-    table.write("\n\nBatching:\n")
-
-    for batchsize in [5,10,100]:
-            table.write("\nBatchsize=" + str(batchsize) + "\n")
-            runtimes = []
-            input_size = []
-            for ns in numts:
-                ts, ev = input_generator(ns,evr,lw,up)
-                file_generator(ts,ev,"batched",batchsize,lw,up,"batching.dat")
-                os.system("touch results.txt")
-                for i in range(0,rep):
-                    os.system("/usr/bin/time -f'%e %M' --append --output=results.txt ./batching_ddlog/target/release/batching_cli < batching.dat > /dev/null")
-                times, _ = eval("results.txt")
-                os.system("rm results.txt")
-                rt = sum(times)/rep
-                sz = ns*evr
-                table.write( str(round(rt,3)) + " " + str(sz) + "\n")
-                runtimes.append(rt)
-                input_size.append(sz)
-
-            plot(input_size=input_size, runtimes=runtimes,description="batchsize="+str(batchsize))
-    
-    table.close()
-
-
-
-
-
+    main()

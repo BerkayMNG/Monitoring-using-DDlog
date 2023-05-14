@@ -1,15 +1,15 @@
-input stream Timestamp(tp:u32,ts:u32)
+input stream Timestamp(tp:u32, ts:s32)
 input stream P(tp:u32, id:u32)
+input stream Q(tp:u32, id:u32)
 
-input relation Intervall(min:u32,max:u32)
-//We have tp1==tp2, I just do this for having the same size
-//per tuple
-output relation Data_cache(tp1:u32,tp2:u32,ts:u32,id:u32)
+relation Once_P(id:u32)
+relation Once_Q(id:u32)
+output relation Report(id:u32)
 
-//we want to cache here all P's which are not out of the "upper bound" of the intervall
-Data_cache(tp1,tp2,ts_old,id) :- Data_cache-1(tp1,tp2,ts_old,id), Timestamp'(tp_new,ts_new),
-                                    Intervall(min,max), ts_new-ts_old <= max.
-Data_cache(tp,tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id).
+Once_P(id) :- P'(_, id).
+Once_P(id) :- Once_P-1(id).
 
+Once_Q(id) :- Q'(_, id).
+Once_Q(id) :- Once_Q-1(id).
 
-
+Report(id) :- Once_P(id), not Once_Q(id).
