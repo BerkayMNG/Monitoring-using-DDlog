@@ -1,0 +1,9 @@
+input stream Timestamp(tp:u32, ts:s32)
+input stream P(tp:u32, id:u32)
+input stream Q(tp:u32, id:u32)
+
+
+output relation Satisfied(tp:u32,id: u32)
+
+Satisfied(tp, id)   :- P'(tp, id), Q'(tp, id).
+
