@@ -1,39 +1,35 @@
-//Formula NEXT[2,4] P(1)
-
-
+//Formula NEXT[min,max] P(id), similar to PREV operator
 
 //input 
-input stream Timestamp(tp:s32, ts:s32)
-input stream P(tp:s32, id:s32)
+input stream Timestamp(tp:u32, ts:u32)
+input stream P(tp:u32, id:u32)
 
 //Auxiliary relation
-input relation Intervall(min:s32, max:s32)
-input relation Value(id:s32)
-// -1 for outputing violation, 1 for satisfied
-input relation Viol_or_sat(id:s32)
+input relation Intervall(min:u32, max:u32)
+input relation Value(id:u32)
 
-relation Cache(tp:s32, ts:s32)
+// -1 for outputing violation, 1 for satisfied
+input relation Viol_or_sat(cat:s32)
+
+//stores timestamps
+relation Cache(ts:u32)
 
 
 //output
-output relation Satisfied(tp:s32, ts:s32, id:s32)
-output relation Violations(tp:s32, ts:s32, id:s32)
+relation Satisfied(tp:u32, ts:u32, id:u32)
+relation Violations(tp:u32, ts:u32, id:u32)
+output relation Output(tp:u32, ts:u32, id:u32)
 
 
-Cache(tp,ts) :- Timestamp'(tp,ts).
-Cache(tp_old,ts_old) :- Cache-1(tp_old,ts_old), Timestamp'(tp_new,ts_new), Intervall(min,max),
-                        tp_old == tp_new-1.
+//store timestamps, needed because of intervall
+Cache(ts) :- Timestamp'(_,ts).
+
+//
+Satisfied(tp-1,ts_old,id) :- Cache-1(ts_old),  Timestamp'(tp, ts_new), P'(tp,id), Intervall(min,max), 
+                            Value(id), ts_new - ts_old <= max, ts_new - ts_old >= min.
+Violations(tp-1,ts_old,id) :- Cache-1(ts_old), Value(id), Timestamp'(tp, ts_new), not Satisfied(_,_,id).
 
 
-Satisfied(tp,ts,id) :- Satisfied-1(tp,ts,id).
-Satisfied(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
-                                Intervall(min,max), Value(id), Viol_or_sat(outpt), outpt == 1, 
-                                ts_new - ts_old <= max, ts_new - ts_old >= min, tp_old == tp_new-1.
-
-Violations(tp,ts,id) :- Violations-1(tp,ts,id).
-Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old), Value(id), Timestamp'(tp_new, ts_new), not P'(tp_new,id),
-                                tp_old == tp_new-1, Viol_or_sat(outpt), outpt == -1.
-Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
-                                Intervall(min,max), Value(id), ts_new - ts_old > max, tp_old == tp_new-1, Viol_or_sat(outpt), outpt == -1.
-Violations(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
-                                Intervall(min,max), Value(id), ts_new - ts_old < min, tp_old == tp_new-1, Viol_or_sat(outpt), outpt == -1.
+Output(tp,ts,id) :- Output-1(tp,ts,id). //only for testing purposes needed
+Output(tp,ts,id) :- Viol_or_sat(cat), cat == 1, Satisfied(tp,ts,id).
+Output(tp,ts,id) :- Viol_or_sat(cat), cat == -1, Violations(tp,ts,id).

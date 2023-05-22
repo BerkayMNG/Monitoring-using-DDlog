@@ -4,10 +4,12 @@ import os
 import matplotlib.pyplot as plt
 
 # Parameters
-REP = 5
-TOTAL_EVENTS = [i*5000 for i in range(1,8,2)]
-PROGRAMS = [ "batched"]
-BATCH_SIZES = [100,1000, 5000]
+REP = 10
+TOTAL_EVENTS = [i*500 for i in range(1,18,3)]
+PROGRAMS = ["not_batched", "batched"]
+BATCH_SIZES = [2,10, 100]
+START_ID = 1
+DIFFERENCE = 0
 
 
 Trace = list[tuple[int, list[tuple[str, int]]]]
@@ -16,9 +18,11 @@ def input_generator(total_events: int) -> Trace:
     num_ts = total_events
     events = []
     num_tp = 0
+    elem = START_ID
     for ts in range(num_ts):
-        elem1 = random.randint(1,3)
-        elem2 = random.randint(1,3)
+        elem1 = elem-DIFFERENCE
+        elem2 = elem
+        elem = elem + random.randint(1,3)
         events.append((ts,[("Q", elem1),("P", elem2)]))
     return events
 
@@ -55,10 +59,12 @@ def measure_series(program: str, batch_size: int) -> list[float]:
     return [measure(program, x, batch_size) for x in TOTAL_EVENTS]
 
 def monpoly_input_generator(total_events: int, filename:str):
+    id = START_ID
     with open(filename, 'w') as file:
         for ts in range(total_events):
-            id1 = random.randint(1,3)
-            id2 = random.randint(1,3)
+            id1 = id
+            id2 = id - DIFFERENCE
+            id = id + random.randint(1,3)
             file.write(f"@{ts} p({id1}) q({id2})\n")
     
 def measure2 (program: str, total_events: int) -> float:
@@ -88,12 +94,18 @@ def main():
             label = f"{program}, batch size {batch_size}"
             plt.plot(TOTAL_EVENTS, measure_series(program, batch_size), label=label)
 
+    plt.xlabel("Number of matching pairs")
+    plt.ylabel("runtime [s]")
+    plt.legend(loc='best')
+    plt.savefig("comparison.png")
+    
+    """
     label = "Monpoly"
     plt.plot(TOTAL_EVENTS,measure_monpoly("cnt"), label=label)
-    plt.xlabel("number of matching pairs")
+    plt.xlabel("Number of matching pairs")
     plt.ylabel("runtime [s]")
-    plt.figlegend()
+    plt.legend(loc='best')
     plt.savefig("comparison.png")
-
+    """
 if __name__ == '__main__':
     main()

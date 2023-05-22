@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 # Parameters
 SEED = 20230508
 REP = 3
-TOTAL_EVENTS = [2_000, 4_000, 6_000, 8_000]
+TOTAL_EVENTS = [i*5000 for i in range(1,20,3)]
 TP_PER_TS = 10
 EV_PER_TP = 2
 MAX_VALUE = 1_000_000_000
-PROGRAMS = ["no_batching", "batching", "batching_new"]
+PROGRAMS = ["no_batching"]
 BATCH_SIZES = [1, 5]
 
 random.seed(SEED)
@@ -68,16 +68,63 @@ def measure(program: str, total_events: int, batch_size: int) -> float:
 def measure_series(program: str, batch_size: int) -> list[float]:
     return [measure(program, x, batch_size) for x in TOTAL_EVENTS]
 
+
+
+def monpoly_file_generator(events: Trace, filename: str):
+    with open(filename, 'w') as file:
+        for ts, elems in events:
+            file.write("@" + str(ts) + " ")
+            for rel, elem in elems:
+                file.write(" " + rel + "(" + str(elem) + ") ")
+            file.write("\n")
+    
+
+def measure2 (program: str, total_events: int) -> float:
+    INPUT_FILE = f"{program}.log"
+    events = input_generator(total_events)
+    monpoly_file_generator(events, INPUT_FILE)
+    args = ["/usr/bin/time", "-f", "%e", "monpoly", "-sig", "exp.sig", "-formula", "exp.mfotl", "-log", "exp.log"]
+    acc = 0.0
+    for _ in range(0, REP):
+        proc = subprocess.run(args, stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
+        proc.check_returncode()
+        elapsed = float(proc.stderr)
+        #print(f"{elapsed:.2f}")
+        acc += elapsed
+    avg = acc / REP
+    print(f"{avg:.2f}")
+    return avg
+
+def measure_monpoly(program: str) -> list[float]:
+    return [measure2(program,x) for x in TOTAL_EVENTS]
+
+
 def main():
     for program in PROGRAMS:
         bsz = [1] if program == "no_batching" else BATCH_SIZES
         for batch_size in bsz:
             label = f"{program}, batch size {batch_size}"
             plt.plot(TOTAL_EVENTS, measure_series(program, batch_size), label=label)
-    plt.xlabel("tp/ts")
+    plt.xlabel("number total events")
     plt.ylabel("runtime [s]")
-    plt.figlegend()
-    plt.savefig("comparison.png")
+    plt.legend(loc='best')
+    plt.savefig("comparison4.png")
+
+def main2():
+    for program in PROGRAMS:
+        bsz = [1] if program == "no_batching" else BATCH_SIZES
+        for batch_size in bsz:
+            label = f"{program}, batch size {batch_size}"
+            plt.plot(TOTAL_EVENTS, measure_series(program, batch_size), label=label)
+
+
+    label = "Monpoly"
+    plt.plot(TOTAL_EVENTS,measure_monpoly("exp"), label=label)
+    plt.xlabel("number total events")
+    plt.ylabel("runtime [s]")
+    plt.legend(loc='best')
+    plt.savefig("comparison_monpoly.png")
+
 
 if __name__ == '__main__':
-    main()
+    main2()

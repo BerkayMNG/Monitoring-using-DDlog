@@ -4,189 +4,378 @@ insert Value(3);
 insert Viol_or_sat(-1);
 commit;
 start;
-insert Timestamp(0,0);
-insert P(0,0);
-insert P(0,0);
-insert Timestamp(1,0);
-insert P(1,0);
-insert P(1,0);
+insert Timestamp(0,1);
+insert P(0,3);
+commit dump_changes;
+
+start;
+insert Timestamp(1,1);
+insert P(1,6);
+commit dump_changes;
+
+start;
 insert Timestamp(2,1);
 insert P(2,0);
+commit dump_changes;
+
+start;
 insert Timestamp(3,1);
-insert P(3,0);
-insert P(3,0);
-insert Timestamp(4,2);
-insert P(4,0);
-insert Timestamp(5,3);
+insert P(3,6);
+commit dump_changes;
+
+start;
+insert Timestamp(4,1);
+insert P(4,2);
+commit dump_changes;
+
+start;
+insert Timestamp(5,2);
 insert P(5,0);
-insert P(5,0);
-insert P(5,0);
-insert Timestamp(6,4);
-insert P(6,0);
-insert Timestamp(7,4);
-insert P(7,0);
-insert Timestamp(8,5);
+insert P(5,4);
+insert P(5,1);
+commit dump_changes;
+
+start;
+insert Timestamp(6,2);
+insert P(6,1);
+insert P(6,4);
+commit dump_changes;
+
+start;
+insert Timestamp(7,2);
+insert P(7,6);
+commit dump_changes;
+
+start;
+insert Timestamp(8,4);
 insert P(8,0);
-insert Timestamp(9,6);
-insert P(9,0);
-insert P(9,0);
 commit dump_changes;
 
 start;
-insert Timestamp(10,8);
-insert P(10,0);
-insert Timestamp(11,9);
-insert P(11,6);
+insert Timestamp(9,4);
+insert P(9,6);
+commit dump_changes;
+
+start;
+insert Timestamp(10,5);
+insert P(10,2);
+commit dump_changes;
+
+start;
+insert Timestamp(11,5);
 insert P(11,0);
-insert Timestamp(12,9);
+commit dump_changes;
+
+start;
+insert Timestamp(12,6);
 insert P(12,0);
-insert P(12,0);
-insert Timestamp(13,9);
-insert P(13,0);
-insert Timestamp(14,10);
-insert P(14,0);
-insert P(14,0);
-insert P(14,0);
-insert Timestamp(15,11);
-insert P(15,0);
-insert P(15,0);
-insert P(15,0);
-insert Timestamp(16,12);
-insert P(16,0);
-insert P(16,0);
+insert P(12,2);
+insert P(12,4);
+commit dump_changes;
+
+start;
+insert Timestamp(13,7);
+insert P(13,6);
+insert P(13,4);
+commit dump_changes;
+
+start;
+insert Timestamp(14,8);
+insert P(14,6);
+insert P(14,1);
+commit dump_changes;
+
+start;
+insert Timestamp(15,10);
+insert P(15,2);
+commit dump_changes;
+
+start;
+insert Timestamp(16,11);
+insert P(16,5);
+commit dump_changes;
+
+start;
 insert Timestamp(17,12);
-insert P(17,0);
-insert Timestamp(18,12);
+insert P(17,5);
+commit dump_changes;
+
+start;
+insert Timestamp(18,14);
 insert P(18,0);
-insert Timestamp(19,13);
-insert P(19,0);
 commit dump_changes;
 
 start;
-insert Timestamp(20,14);
+insert Timestamp(19,14);
+insert P(19,6);
+insert P(19,5);
+commit dump_changes;
+
+start;
+insert Timestamp(20,15);
 insert P(20,0);
-insert Timestamp(21,15);
-insert P(21,0);
-insert P(21,0);
-insert Timestamp(22,16);
-insert P(22,0);
-insert P(22,0);
-insert Timestamp(23,17);
-insert P(23,3);
-insert Timestamp(24,18);
-insert P(24,0);
-insert P(24,0);
-insert Timestamp(25,18);
-insert P(25,0);
-insert Timestamp(26,18);
-insert P(26,0);
-insert Timestamp(27,19);
-insert P(27,0);
-insert P(27,0);
-insert Timestamp(28,21);
-insert P(28,4);
-insert Timestamp(29,21);
-insert P(29,0);
+insert P(20,0);
+insert P(20,4);
 commit dump_changes;
 
 start;
-insert Timestamp(30,21);
-insert P(30,0);
-insert Timestamp(31,22);
+insert Timestamp(21,15);
+insert P(21,2);
+commit dump_changes;
+
+start;
+insert Timestamp(22,17);
+insert P(22,3);
+commit dump_changes;
+
+start;
+insert Timestamp(23,18);
+insert P(23,1);
+insert P(23,2);
+commit dump_changes;
+
+start;
+insert Timestamp(24,19);
+insert P(24,2);
+commit dump_changes;
+
+start;
+insert Timestamp(25,19);
+insert P(25,1);
+commit dump_changes;
+
+start;
+insert Timestamp(26,21);
+insert P(26,6);
+commit dump_changes;
+
+start;
+insert Timestamp(27,22);
+insert P(27,1);
+commit dump_changes;
+
+start;
+insert Timestamp(28,23);
+insert P(28,4);
+insert P(28,1);
+commit dump_changes;
+
+start;
+insert Timestamp(29,24);
+insert P(29,4);
+commit dump_changes;
+
+start;
+insert Timestamp(30,26);
+insert P(30,4);
+commit dump_changes;
+
+start;
+insert Timestamp(31,27);
 insert P(31,0);
-insert Timestamp(32,23);
-insert P(32,0);
-insert Timestamp(33,24);
-insert P(33,0);
-insert P(33,0);
-insert Timestamp(34,25);
-insert P(34,0);
-insert Timestamp(35,26);
-insert P(35,0);
-insert Timestamp(36,28);
-insert P(36,6);
-insert Timestamp(37,28);
-insert P(37,9);
-insert P(37,0);
-insert Timestamp(38,29);
+commit dump_changes;
+
+start;
+insert Timestamp(32,28);
+insert P(32,1);
+commit dump_changes;
+
+start;
+insert Timestamp(33,29);
+insert P(33,4);
+insert P(33,5);
+commit dump_changes;
+
+start;
+insert Timestamp(34,30);
+insert P(34,6);
+commit dump_changes;
+
+start;
+insert Timestamp(35,30);
+insert P(35,6);
+insert P(35,5);
+insert P(35,1);
+commit dump_changes;
+
+start;
+insert Timestamp(36,30);
+insert P(36,0);
+commit dump_changes;
+
+start;
+insert Timestamp(37,31);
+insert P(37,1);
+insert P(37,3);
+insert P(37,6);
+commit dump_changes;
+
+start;
+insert Timestamp(38,31);
 insert P(38,0);
-insert Timestamp(39,30);
+commit dump_changes;
+
+start;
+insert Timestamp(39,32);
 insert P(39,0);
+insert P(39,5);
 commit dump_changes;
 
 start;
 insert Timestamp(40,32);
-insert P(40,0);
-insert P(40,0);
+insert P(40,3);
+insert P(40,5);
+commit dump_changes;
+
+start;
 insert Timestamp(41,33);
-insert P(41,1);
-insert P(41,0);
-insert P(41,0);
+insert P(41,6);
+commit dump_changes;
+
+start;
 insert Timestamp(42,33);
-insert P(42,0);
+insert P(42,4);
+commit dump_changes;
+
+start;
 insert Timestamp(43,34);
+insert P(43,6);
+insert P(43,3);
 insert P(43,0);
-insert P(43,0);
-insert P(43,0);
+commit dump_changes;
+
+start;
 insert Timestamp(44,35);
-insert P(44,0);
-insert Timestamp(45,36);
-insert P(45,0);
-insert P(45,0);
-insert Timestamp(46,36);
-insert P(46,0);
-insert Timestamp(47,37);
-insert P(47,0);
-insert Timestamp(48,38);
+insert P(44,4);
+commit dump_changes;
+
+start;
+insert Timestamp(45,35);
+insert P(45,5);
+commit dump_changes;
+
+start;
+insert Timestamp(46,35);
+insert P(46,3);
+commit dump_changes;
+
+start;
+insert Timestamp(47,36);
+insert P(47,4);
+commit dump_changes;
+
+start;
+insert Timestamp(48,37);
 insert P(48,0);
-insert Timestamp(49,41);
-insert P(49,0);
+insert P(48,3);
+insert P(48,0);
 commit dump_changes;
 
 start;
-insert Timestamp(50,42);
-insert P(50,1);
-insert Timestamp(51,42);
-insert P(51,0);
-insert P(51,0);
-insert P(51,0);
-insert Timestamp(52,42);
-insert P(52,0);
-insert P(52,0);
-insert Timestamp(53,42);
-insert P(53,0);
-insert Timestamp(54,43);
-insert P(54,0);
-insert P(54,0);
-insert Timestamp(55,43);
-insert P(55,0);
-insert Timestamp(56,44);
-insert P(56,6);
-insert P(56,1);
+insert Timestamp(49,37);
+insert P(49,4);
+commit dump_changes;
+
+start;
+insert Timestamp(50,38);
+insert P(50,0);
+insert P(50,5);
+commit dump_changes;
+
+start;
+insert Timestamp(51,39);
+insert P(51,4);
+commit dump_changes;
+
+start;
+insert Timestamp(52,40);
+insert P(52,6);
+insert P(52,3);
+insert P(52,3);
+commit dump_changes;
+
+start;
+insert Timestamp(53,40);
+insert P(53,3);
+commit dump_changes;
+
+start;
+insert Timestamp(54,41);
+insert P(54,6);
+commit dump_changes;
+
+start;
+insert Timestamp(55,42);
+insert P(55,3);
+commit dump_changes;
+
+start;
+insert Timestamp(56,43);
+insert P(56,3);
+commit dump_changes;
+
+start;
 insert Timestamp(57,44);
-insert P(57,0);
-insert Timestamp(58,44);
-insert P(58,0);
-insert P(58,0);
-insert Timestamp(59,45);
-insert P(59,0);
+insert P(57,3);
+insert P(57,1);
 commit dump_changes;
 
 start;
-insert Timestamp(60,45);
-insert P(60,0);
-insert Timestamp(61,46);
-insert P(61,0);
-insert Timestamp(62,46);
-insert P(62,0);
-insert Timestamp(63,48);
-insert P(63,0);
-insert P(63,0);
-insert Timestamp(64,49);
-insert P(64,2);
-insert P(64,0);
-insert Timestamp(65,50);
-insert P(65,0);
-insert P(65,0);
+insert Timestamp(58,45);
+insert P(58,3);
+insert P(58,4);
+insert P(58,5);
+commit dump_changes;
+
+start;
+insert Timestamp(59,46);
+insert P(59,1);
+commit dump_changes;
+
+start;
+insert Timestamp(60,46);
+insert P(60,6);
+commit dump_changes;
+
+start;
+insert Timestamp(61,47);
+insert P(61,2);
+commit dump_changes;
+
+start;
+insert Timestamp(62,47);
+insert P(62,4);
+commit dump_changes;
+
+start;
+insert Timestamp(63,47);
+insert P(63,4);
+insert P(63,6);
+insert P(63,6);
+commit dump_changes;
+
+start;
+insert Timestamp(64,48);
+insert P(64,5);
+commit dump_changes;
+
+start;
+insert Timestamp(65,49);
+insert P(65,3);
+commit dump_changes;
+
+start;
+insert Timestamp(66,49);
+insert P(66,6);
+commit dump_changes;
+
+start;
+insert Timestamp(67,50);
+insert P(67,2);
+commit dump_changes;
+
+start;
+insert Timestamp(68,50);
+insert P(68,6);
 commit dump_changes;
 

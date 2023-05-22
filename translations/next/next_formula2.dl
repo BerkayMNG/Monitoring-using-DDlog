@@ -1,24 +1,22 @@
-//Formula NEXT[2,4] P(x)
+//Formula NEXT[min,max] P(x)
 
-//Did not test this Formula with test examples
+//Nor tested or compiled, so might be wrong
 
 //input 
-input stream Timestamp(tp:s32, ts:s32)
-input stream P(tp:s32, id:s32)
+input stream Timestamp(tp:u32, ts:u32)
+input stream P(tp:u32, id:u32)
+input relation Intervall(min:u32, max:u32)
 
 //Auxiliary relation
-relation Intervall(min:s32, max:s32)
-relation Cache(tp:s32, ts:s32)
-Intervall(2,4) :- .
+relation Intervall(min:u32, max:u32)
+relation Cache(ts:u32)
+
 
 //output
-output relation Satisfied(tp:s32, ts:s32, id:s32)
+output relation Satisfied(tp:u32, ts:u32, id:u32)
+
+Cache(ts) :- Timestamp'(_,ts).
 
 
-Cache(tp,ts) :- Timestamp'(tp,ts).
-Cache(tp_old,ts_old) :- Cache-1(tp_old,ts_old), Timestamp'(tp_new,ts_new), Intervall(min,max),
-                        tp_old == tp_new-1.
-
-
-Satisfied(tp_old,ts_old,id) :- Cache(tp_old, ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
-                                Intervall(min,max), ts_new - ts_old <= max, ts_new - ts_old >= min, tp_old == tp_new-1.
+Satisfied(tp_old,ts_old,id) :- Cache-1(ts_old),  Timestamp'(tp_new, ts_new), P'(tp_new,id), 
+                                Intervall(min,max), ts_new - ts_old <= max, ts_new - ts_old >= min, ts_old <= ts_new.

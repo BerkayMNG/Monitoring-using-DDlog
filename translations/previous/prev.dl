@@ -1,11 +1,7 @@
 
 /*
 REMARK:
-
-For a better overview (with less comments) check the files prev_formula1.dl &
-prev_formula2.dl under the same directory. However, the described files were used 
-for testing, so they were specifically designed to not look at a fixed formula but 
-to allow "variation" (which intervall, which value, analysing violations or satisfaction etc)
+Old version with batching, not needed anymore
 */
 
 
@@ -26,38 +22,32 @@ Log:            @1 p(1) p(2)
 */
 
 //input 
-input stream Timestamp(tp:s32, ts:s32)
-input stream P(tp:s32, id:s32)
+input stream Timestamp(tp:u32, ts:u32)
+input stream P(tp:u32, id:u32)
 
-relation Intervall(min:s32, max:s32)
+relation Intervall(min:u32, max:u32)
 Intervall(2,4) :- .
 
 //Auxiliary relation
-relation Cache(tp:s32, ts:s32, id:s32)
-
-relation Value(id:s32)
+relation Cached(ts:u32, id:u32)
+relation Value(id:u32)
 Value(1) :- .
 
 
 //output
-output relation Satisfied(tp:s32, ts:s32, id:s32)
-output relation Violations(tp:s32, ts:s32, id:s32)
-
-/*
-First rule: get new tuples from batch
-Second rule: Tuples from previous transaction which might be needed
-*/
-Cache(tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id).
-Cache(tp_old,ts_old,id) :- Cache-1(tp_old,ts_old,id), Timestamp'(tp_new,ts_new),
-                            tp_old == tp_new -1.
+output relation Satisfied(tp:u32, ts:u32, id:u32)
+//output relation Violations(tp:u32, ts:u32, id:u32)
 
 
-Satisfied(tp_new,ts_new,id) :- Cache(tp_old, ts_old, id), Timestamp'(tp_new,ts_new), 
-                                Intervall(min,max), Value(id),
-                                ts_new - ts_old <= max, ts_new - ts_old >= min, tp_old == tp_new-1.
+
+Cached(ts,id) :- Timestamp'(_,ts), P'(_,id).
+
+
+Satisfied(tp,ts_new,id) :- Cached(ts_old, id), Timestamp'(tp,ts_new), Intervall(min,max), Value(id),
+                                ts_new - ts_old <= max, ts_new - ts_old >= min.
 
 //corresponds to negate in VeriMon
-Violations(tp,ts,id) :- Timestamp'(tp,ts), Value(id), not Satisfied(tp,_,id).
+//Violations(tp,ts,id) :- Timestamp'(tp,ts), Value(id), not Satisfied(_,_,id).
 
 
 
@@ -66,17 +56,17 @@ Below program for formula: PREV[2,4] P(x)
 Here VeriMon cannot negate, so no "violations"
 */
 /*
-input stream Timestamp(tp:s32, ts:s32)
-input stream P(tp:s32, id:s32)
+input stream Timestamp(tp:u32, ts:u32)
+input stream P(tp:u32, id:u32)
 
-relation Intervall(min:s32, max:s32)
+relation Intervall(min:u32, max:u32)
 Intervall(2,4) :- .
 
-relation Cache(tp:s32, ts:s32, id:s32)
+relation Cache(tp:u32, ts:u32, id:u32)
 
 
 
-output relation Satisfied(tp:s32, ts:s32, id:s32)
+output relation Satisfied(tp:u32, ts:u32, id:u32)
 
 Cache(tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id).
 Cache(tp_old,ts_old,id) :- Cache-1(tp_old,ts_old,id), Timestamp'(tp_new,ts_new),

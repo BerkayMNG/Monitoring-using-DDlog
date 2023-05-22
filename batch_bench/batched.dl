@@ -3,7 +3,15 @@ input stream P(tp:u32, id:u32)
 input stream Q(tp:u32, id:u32)
 
 
-output relation Satisfied(tp:u32,id: u32)
+output relation Satisfied(id: u32)
+relation Cache_P(id: u32)
+relation Cache_Q(id: u32)
 
-Satisfied(tp, id)   :- P'(tp, id), Q'(tp, id).
+
+Cache_P(id) :- P'(_,id).
+Cache_P(id) :- Cache_P-1(id).
+Cache_Q(id) :- Q'(_,id).
+Cache_Q(id) :- Cache_Q-1(id).
+
+Satisfied(id) :- Cache_P(id),Cache_Q(id). 
 

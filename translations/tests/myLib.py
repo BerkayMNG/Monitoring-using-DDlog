@@ -222,7 +222,7 @@ def gen_tests_binary(Data:str,nameDat:str, nameLog:str, batchSize:int, min:int, 
 
 """
 def runTest_binary(path:str, Data:list, datFile:str, logFile:str, min:int, max:int, wrapSize:int, vary:bool):
-    for batchsize in [1,5,10]:
+    for batchsize in [1]: #changed batchsize to one since we don't batch anymore
         gen_tests_binary(Data, datFile,logFile, batchsize, min, max,wrapSize, vary)
         logFile_prefix = logFile[:-4]
 
@@ -442,6 +442,8 @@ def compare_unary(cat:int,fileDDlog:str, FileLMonPoly:str):
                         continue
 
                     tuple_temp = re.findall(r'\d+', line)[0:2]
+                    if not tuple_temp: #empty
+                        continue
                     tuple = [int(x) for x in tuple_temp]
                     DataDDlog.append(tuple)
 
@@ -451,7 +453,6 @@ def compare_unary(cat:int,fileDDlog:str, FileLMonPoly:str):
             with open(FileLMonPoly, "r") as f:
                 for line in f:
                     tuple_temp = re.findall(r'\d+', line)
-                    
                     tuple = []
                     tuple.append(int(tuple_temp[1]))
                     tuple.append(int(tuple_temp[0]))
@@ -499,7 +500,7 @@ def gen_tests_unary(cat:int, viol_or_sat:int, Data:str,nameDat:str, nameLog:str,
 
 
 def runTest_unary(path:str,cat:str, viol_or_sat:int, Data:list, datFile:str, logFile:str, min:int, max:int, id:int, wrapSize:int, vary:bool):
-    for batchsize in [1,5,10]:
+    for batchsize in [1]:
         gen_tests_unary(cat, viol_or_sat, Data, datFile,logFile, batchsize, min, max, id, wrapSize, vary)
         logFile_prefix = logFile[:-4]
 

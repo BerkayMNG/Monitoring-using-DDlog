@@ -1,37 +1,41 @@
-//Formula PREV[2,4] P(1) (where intervall & id of P can be easily changed)
+/*
+Using input relations, this prorgam monitors:
+
+PREV[min,max] P(id)
+
+Value specifies the concrete id above in the above formula and 
+min max the intervall of the opterator. Rest should be clear.
+
+@Viol_or_sat outputs "Satisfaction" if cat == 1 and Violations if cat == -1
+*/
 
 //input 
-input stream Timestamp(tp:s32, ts:s32)
-input stream P(tp:s32, id:s32)
-
-input relation Intervall(min:s32, max:s32)
-input relation Value(id:s32)
-input relation Viol_or_sat(id:s32)
+input stream Timestamp(tp:u32, ts:u32)
+input stream P(tp:u32, id:u32)
+input relation Intervall(min:u32, max:u32)
+input relation Value(id:u32)
+input relation Viol_or_sat(cat:s32)
 
 //Auxiliary relation
-relation Cache(tp:s32, ts:s32, id:s32)
-relation Satisfied_cache(tp:s32, ts:s32, id:s32) //only needed for testing purposes
-
-//output
-output relation Satisfied(tp:s32, ts:s32, id:s32)
-output relation Violations(tp:s32, ts:s32, id:s32)
-
-/*
-First rule: get new tuples from batch
-Second rule: Tuples from previous transaction which might be needed
-*/
-Cache(tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id).
-Cache(tp_old,ts_old,id) :- Cache-1(tp_old,ts_old,id), Timestamp'(tp_new,ts_new),
-                            tp_old == tp_new -1.
+relation Cached(ts:u32, id:u32)
 
 
-Satisfied_cache(tp_new,ts_new,id) :- Cache(tp_old, ts_old, id), Timestamp'(tp_new,ts_new), 
-                                Intervall(min,max), Value(id),
-                                ts_new - ts_old <= max, ts_new - ts_old >= min, tp_old == tp_new-1.
+//determine output
+relation Satisfied(tp:u32, ts:u32, id:u32)
+relation Violations(tp:u32, ts:u32, id:u32)
+output relation Output(tp:u32,ts:u32,id:u32)
 
-Satisfied(tp,ts,id) :- Satisfied-1(tp,ts,id).
-Satisfied(tp,ts,id) :- Satisfied_cache(tp,ts,id), Viol_or_sat(outpt), outpt == 1.
 
-//corresponds to negate in VeriMon
-Violations(tp,ts,id) :- Violations-1(tp,ts,id).
-Violations(tp,ts,id) :- Timestamp'(tp,ts), Value(id), not Satisfied_cache(tp,_,id),Viol_or_sat(outpt), outpt == -1,.
+
+Cached(ts,id) :- Timestamp'(_,ts), P'(_,id).
+
+
+Satisfied(tp,ts_new,id) :- Cached-1(ts_old, id), Timestamp'(tp,ts_new), Intervall(min,max), Value(id),
+                             ts_new - ts_old <= max, ts_new - ts_old >= min.
+
+
+Violations(tp,ts,id) :- Timestamp'(tp,ts), Value(id), not Satisfied(_,_,id).
+
+Output(tp,ts,id) :- Output-1(tp,ts,id). //only for testing purposes needed
+Output(tp,ts,id) :- Satisfied(tp,ts,id), Viol_or_sat(cat), cat == 1.
+Output(tp,ts,id) :- Violations(tp,ts,id), Viol_or_sat(cat), cat == -1.

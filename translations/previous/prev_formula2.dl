@@ -2,26 +2,24 @@
 Below program for formula: PREV[2,4] P(x)
 Here VeriMon cannot negate, so no "violations"
 
-Did not test this Formula with test examples
+Did not test this Formula, so might be wrong
 */
 
 //input
-input stream Timestamp(tp:s32, ts:s32)
-input stream P(tp:s32, id:s32)
+input stream Timestamp(tp:u32, ts:u32)
+input stream P(tp:u32, id:u32)
 
 //Auxiliary
-relation Intervall(min:s32, max:s32)
-relation Cache(tp:s32, ts:s32, id:s32)
+relation Intervall(min:u32, max:u32)
+relation Cached(tp:u32, ts:u32, id:u32)
 Intervall(2,4) :- .
 
 //output
-output relation Satisfied(tp:s32, ts:s32, id:s32)
+output relation Satisfied(tp:u32, ts:u32, id:u32)
 
 
 
-Cache(tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id).
-Cache(tp_old,ts_old,id) :- Cache-1(tp_old,ts_old,id), Timestamp'(tp_new,ts_new),
-                            tp_old == tp_new -1.
+Cachde(ts,id) :- Timestamp'(_,ts), P'(_,id).
 
-Satisfied(tp_new,ts_new,id) :- Cache(tp_old, ts_old, id), Timestamp'(tp_new,ts_new),Intervall(min,max),
-                                ts_new - ts_old <= max, ts_new - ts_old >= min, tp_old == tp_new-1.
+Satisfied(tp_new,ts_new,id) :- Cached-1(ts_old, id), Timestamp'(tp_new,ts_new),Intervall(min,max),
+                                ts_new - ts_old <= max, ts_new - ts_old >= min.

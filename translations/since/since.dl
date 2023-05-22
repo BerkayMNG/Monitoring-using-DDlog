@@ -1,35 +1,58 @@
-//Formula P(x) SINCE[min,max] Q(x)
 
-//input
-input stream Timestamp(tp:s32, ts:s32)
-input stream P(tp:s32, id:s32)
-input stream Q(tp:s32, id:s32)
-input relation Intervall(min:s32, max:s32) //more generic
+input stream Timestamp(tp:u32, ts:u32)
+input stream P(tp:u32, id:u32)
+input stream Q(tp:u32, id:u32)
+input relation Intervall(min:u32, max:u32) 
 
-/*
-if you want to fix the intervall use this
-relation Intervall(min:s32, max:s32)
-Intervall(2,4) :- . 
-*/
+
 
 //Auxiliary
-relation P_cache(tp:s32,ts:s32,id:s32)
-relation Q_cache(tp:s32,ts:s32,id:s32)
-relation Tuple_chain(ap:s32,tp:s32,ts:s32,id:s32)
+//tp not needed anymore when not batched
+relation Data_cached(ts:u32, id:u32)  //corresponds to data_in and Data_prev in SLW
+relation Tuple_since(ts:u32, id:u32)
+
+//output
+output relation Satisfied(tp:u32, ts:u32, id:u32)
+
+
+
+Data_cached(ts, id)         :- Q'(_,id), Timestamp'(_, ts). //since not batched just join without extra step- maybe faster
+Data_cached(ts_old, id)     :- Data_cached-1(ts_old, id), Timestamp'(_, ts_new), Intervall(min,max),
+                                ts_old <= ts_new, ts_new - ts_old <= max.
+
+Tuple_since(ts,id)          :- Q'(_,id), Timestamp'(_, ts), not Tuple_since-1(_,id).
+Tuple_since(ts,id)          :- Q'(_,id), Timestamp'(_, ts), Tuple_since-1(_,id), not P'(_,id).
+Tuple_since(ts,id)          :- Tuple_since-1(ts,id), P'(_,id).
+
+Satisfied(tp,ts_new,id)     :- Tuple_since(ts_old,id), Timestamp'(tp,ts_new), Intervall(min,max),
+                                ts_old <= ts_new, ts_new - ts_old <= max, ts_new - ts_old >= min.
+Satisfied(tp,ts,id)         :- Satisfied-1(tp,ts,id).
+
+
+
+
+
+
+
+/**
+input stream Timestamp(tp:u32, ts:u32)
+input stream P(tp:u32, id:u32)
+input stream Q(tp:u32, id:u32)
+input relation Intervall(min:u32, max:u32) //more generic
+
+
+
+//Auxiliary
+relation P_cache(tp:u32,ts:u32,id:u32)
+relation Q_cache(tp:u32,ts:u32,id:u32)
+relation Tuple_chain(ap:u32,tp:u32,ts:u32,id:u32)
 
 
 //output
-output relation Satisfied(ap:s32, ts:s32, id:s32)
+output relation Satisfied(ap:u32, ts:u32, id:u32)
 
 
 
-/*
-Q_cache stores all Q's which did not fall out of the intervall yet. Considering the SLW algorithm, Q_cache
-is in some sense the untion of Data_in and Data_cache.
-
-P_cache stores the P streams which might be needed later. (Cannot retrieve this information only from Tuple_chain,
-since it would be necessary to use a antijoin in Tuple_chain rule with itself- which DDlog cannot compute (which also makes sense))
-*/
 Q_cache(tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Q_cache-1(tp_old,ts_old,id), Intervall(min,max), tp_new - ts_old <= max. 
 Q_cache(tp,ts,id) :- Timestamp'(tp,ts), Q'(tp,id).
 
@@ -37,11 +60,6 @@ P_cache(tp_new-1,ts_old,id) :- Timestamp'(tp_new,ts_new), P_cache-1(tp_new-1,ts_
 P_cache(tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id).
 
 
-/*
-First rule: Keep latest information, which might me needed to update the chain
-Second & third rule: Q will be put at the start of the chain if and only if there isn't already a longer chain with the same id
-fourth rule: update the chain- 
-*/
 Tuple_chain(tp_new-1,tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Tuple_chain-1(tp_new-1,tp_old,ts_old,id),
                                             Intervall(min,max), ts_new - ts_old <= max.
 Tuple_chain(tp_new,tp_new,ts_new,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new,id).
@@ -50,7 +68,7 @@ Tuple_chain(tp_new,tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), P'(tp_new,id)
 
 
 
-
-//Output like VeriMon
 Satisfied(ap,ts_new,id) :- Satisfied-1(ap,ts_new,id).
 Satisfied(ap,ts_new,id) :- Tuple_chain(ap,tp,ts,id), Timestamp'(ap,ts_new), Intervall(min,max), ts_new - ts <= max, ts_new - ts >= min.
+
+*/
