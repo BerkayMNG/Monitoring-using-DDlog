@@ -6,7 +6,7 @@ from myLib import test_binary
 #Formula is P(x) SINCE[0,0] Q(x), So I_min=I_max = I_const = 0
 I_const = 0
 size = 100
-path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
+path = "/home/berkay/Monitoring-using-DDlog/translations/since/since3_ddlog/target/release/since3_cli <"
 
 logFile = "since_test3.log"
 datFile = "since_test3.dat"

@@ -1,0 +1,26 @@
+
+//Input, for Formula: EVENTUALLY[min,max] p(id)
+input stream Timestamp(tp:u32, ts:u32)
+input stream P(tp:u32, id:u32)
+input relation Intervall(min:u32, max:u32)
+input relation Value(id:u32)
+
+//auxiliary, needed to output past where formula was satisfied
+relation Relevant_Timestamps(tp:u32, ts:u32)
+
+//output
+output relation Satisfied(tp:u32, ts:u32, id:u32)
+
+//Store old Timestamps as long as they are not out of the intervall
+Relevant_Timestamps(tp,ts)          :- Timestamp'(tp,ts).
+Relevant_Timestamps(tp,ts_old)      :- Relevant_Timestamps-1(tp,ts_old), Timestamp'(_,ts_new), Intervall(_,max),
+                                        ts_new - ts_old <= max.
+
+//As usual, first rule just more comfortable to read
+// Snd rule does the computation
+Satisfied(tp,ts,id)                 :- Satisfied-1(tp,ts,id).
+Satisfied(tp_old,ts_old,id)         :- Value(id), P'(tp_new,id), Timestamp'(tp_new, ts_new), Relevant_Timestamps(tp_old,ts_old),
+                                        Intervall(min,max), ts_new - ts_old <= max, ts_new -ts_old >= min.
+                             
+
+

@@ -7,7 +7,7 @@ from myLib import test_binary
 I_min = 20
 I_max = 30
 size = 100
-path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
+path = "/home/berkay/Monitoring-using-DDlog/translations/since/since3_ddlog/target/release/since3_cli <"
 
 logFile = "since_test4.log"
 datFile = "since_test4.dat"

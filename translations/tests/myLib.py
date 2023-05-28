@@ -165,7 +165,7 @@ def compare_binary(fileDDlog:str, FileLMonPoly:str):
     DataDDlog = []
     with open(fileDDlog, "r") as f:
         for line in f:
-            if("Satisfied:" in line):
+            if("Output:" in line):
                 continue
 
             tuple_temp = re.findall(r'\d+', line)[0:3]
