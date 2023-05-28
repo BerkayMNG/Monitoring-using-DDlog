@@ -4,14 +4,11 @@ sys.path.append("/home/berkay/Monitoring-using-DDlog/translations/tests")
 from myLib import test_binary
     
 
-
-
-
 #Formula is P(x) SINCE[0,3] Q(x)
 I_min = 0
 I_max = 3
-size = 100
-path = "/home/berkay/Monitoring-using-DDlog/translations/since/since_ddlog/target/release/since_cli <"
+size = 1000
+path = "/home/berkay/Monitoring-using-DDlog/translations/since/since3_ddlog/target/release/since3_cli <"
 
 logFile = "since_test1.log"
 datFile = "since_test1.dat"
