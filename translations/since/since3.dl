@@ -24,7 +24,7 @@ Relevant(ts_old, id)        :- Relevant-1(ts_old, id), Timestamp'(_, ts_new), In
                                 ts_new - ts_old <= max.
 
 Tuple_since(ts,id)          :- Q'(_,id), Timestamp'(_, ts), not Tuple_since-1(_,id).
-Tuple_since(ts,id)          :- Q'(_,id), Timestamp'(_, ts), Tuple_since-1(_,id), not P'(_,id).
+Tuple_since(ts,id)          :- Q'(_,id), Timestamp'(_, ts), not P'(_,id).
 Tuple_since(ts,id)          :- Tuple_since-1(ts_old,id), P'(_,id), Relevant(ts2, id), ts_old <= ts2,
                                 var ts = ts2.group_by((id)).min().
 

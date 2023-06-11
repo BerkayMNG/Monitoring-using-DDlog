@@ -2,16 +2,14 @@ input stream Timestamp(tp:u32, ts:s32)
 input stream P(tp:u32, id:u32)
 input stream Q(tp:u32, id:u32)
 
-
 output relation Satisfied(id: u32)
-relation Cache_P(id: u32)
-relation Cache_Q(id: u32)
+relation Once_P(id: u32)
+relation Once_Q(id: u32)
 
+Once_P(id) :- P'(_,id).
+Once_P(id) :- Once_P-1(id).
+Once_Q(id) :- Q'(_,id).
+Once_Q(id) :- Once_Q-1(id).
 
-Cache_P(id) :- P'(_,id).
-Cache_P(id) :- Cache_P-1(id).
-Cache_Q(id) :- Q'(_,id).
-Cache_Q(id) :- Cache_Q-1(id).
-
-Satisfied(id) :- Cache_P(id),Cache_Q(id). 
+Satisfied(id) :- Once_P(id),Once_Q(id).
 

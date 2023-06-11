@@ -4,10 +4,10 @@ import os
 import matplotlib.pyplot as plt
 
 # Parameters
-REP = 10
-TOTAL_EVENTS = [i*500 for i in range(1,18,3)]
+REP = 3
+TOTAL_EVENTS = [i*500 for i in range(1,18,2)]
 PROGRAMS = ["not_batched", "batched"]
-BATCH_SIZES = [2,10, 100]
+BATCH_SIZES = [100]
 START_ID = 1
 DIFFERENCE = 0
 
@@ -97,15 +97,15 @@ def main():
     plt.xlabel("Number of matching pairs")
     plt.ylabel("runtime [s]")
     plt.legend(loc='best')
-    plt.savefig("comparison.png")
+    plt.savefig("comparison.png", dpi = 500)
     
-    """
+    
     label = "Monpoly"
     plt.plot(TOTAL_EVENTS,measure_monpoly("cnt"), label=label)
     plt.xlabel("Number of matching pairs")
     plt.ylabel("runtime [s]")
     plt.legend(loc='best')
     plt.savefig("comparison.png")
-    """
+    
 if __name__ == '__main__':
     main()

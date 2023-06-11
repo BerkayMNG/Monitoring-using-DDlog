@@ -1,0 +1,66 @@
+// Formula:  p(x) UNTIL[min,max] q(x)
+
+input stream Timestamp(tp:s32, ts:s32)
+input stream P(tp:s32, id:s32)
+input stream Q(tp:s32, id:s32)
+input relation Intervall(min:s32, max:s32)
+
+
+/*
+A bit different than since_dl- here we don't make a difference between data_in and data_prev,
+since in later rules we will differentiate wheter it is now in the intervall anyways-
+so we save number of rules and number of intermediate relations
+
+Also analysispont in Tuple_chain is useful to differentiate between the actual timepoints and 
+the timepoints where we are right now
+
+Satisfied_cached is needed to not directly output once we observe satisfactions, since the order of the output
+does also matter
+*/
+relation Data_cache(tp:s32, ts:s32, id:s32)
+relation Tuple_chain(ap: s32, tp:s32, ts:s32, id:s32)
+relation Satisfied_cached(tp:s32, ts:s32, id:s32)
+
+
+output relation Satisfied(tp:s32, ts:s32, id:s32)
+
+/*
+First rule: Cache all P(x)'s of current batch
+Second rule & third: Keep all P(x)'s which might be relevant from old batch
+*/
+Data_cache(tp, ts, id) :- Timestamp'(tp,ts), P'(tp,id).
+Data_cache(tp_old, ts_old, id) :- Timestamp'(tp_new, ts_new), Data_cache-1(tp_old, ts_old, id), Intervall(min, max),
+                                    ts_new - ts_old <= max.
+
+
+/*
+General: Tuple_chain stores longest chain of a certain id
+
+First rule: Start of a "chain"
+
+Second and third rule: update longest "chain" (even if out of the intervall)
+*/
+Tuple_chain(tp,tp,ts,id) :- Timestamp'(tp,ts), P'(tp,id), not Data_cache(tp-1,_,id).
+Tuple_chain(ap, tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), Tuple_chain-1(ap, tp_old,ts_old,id),
+                                      ap == tp_new -1.
+Tuple_chain(tp_new, tp_old,ts_old,id) :- Timestamp'(tp_new,ts_new), P'(tp_new,id), Tuple_chain(ap, tp_old,ts_old,id),
+                                        ap == tp_new -1.
+
+/*
+First and second rule:  Current & old batch have to be considered for satisfiying the formula. When Q(id) occurs, we must have a Tuple_chain
+                        entry in the previous timepoint (here analysispoint) & Intervall contraint has to hold as well
+
+Third rule: Special case where we have [0,0]
+*/
+
+Satisfied_cached(tp,ts,id) :- Satisfied_cached-1(tp,ts,id).
+Satisfied_cached(tp_inter,ts_inter,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new, id), Tuple_chain-1(ap,tp_old,ts_old,id), Intervall(min,max),
+                                    Data_cache(tp_inter, ts_inter, id), ap == tp_new-1, ts_new - ts_inter <= max, ts_new - ts_inter >= min,
+                                    tp_inter <= tp_new-1, tp_inter >= tp_old.
+Satisfied_cached(tp_inter,ts_inter,id) :- Timestamp'(tp_new,ts_new), Q'(tp_new, id), Tuple_chain(ap,tp_old,ts_old,id), Intervall(min,max),
+                                    Data_cache(tp_inter, ts_inter, id), ap == tp_new-1, ts_new - ts_inter <= max, ts_new - ts_inter >= min,
+                                    tp_inter <= tp_new-1, tp_inter >= tp_old.
+Satisfied_cached(tp,ts,id) :- Timestamp'(tp,ts), Q'(tp, id), Intervall(min,max), min == 0.
+
+
+Satisfied(tp,ts,id) :- Satisfied_cached(tp,ts,id), Timestamp'(tp_curr, ts_curr), Intervall(min,max), ts_curr - ts > max.
