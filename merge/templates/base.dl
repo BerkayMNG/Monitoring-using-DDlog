@@ -16,7 +16,7 @@ input stream {{symbol-}} (tp:u32
 {% if formula.identifier == 0 %}
 output relation Output(tp:u32,ts:u32
             {%-for args_name,type in formula.args -%}
-                ,{{args_name}}:{{type}}
+                ,id{{loop.index}}:{{type}} 
             {%-endfor-%})
 Output(tp:u32,ts:u32
         {%-for args_name,type in formula.args -%}

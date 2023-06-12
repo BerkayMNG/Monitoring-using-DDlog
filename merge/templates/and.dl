@@ -10,9 +10,9 @@
 relation Result_{{formula.identifier}}(
         {%-for args_name,type in formula.args -%}
             {%- if loop.last -%}
-                {{args_name}}:{{type}}
+                id{{loop.index}}:{{type}} 
             {%- else -%}
-                {{args_name}}:{{type}},
+                id{{loop.index}}:{{type}} ,
             {%- endif -%}
         {%-endfor-%})
 

@@ -2,7 +2,7 @@ start;
 insert Timestamp(0,1);
 insert P(0,1,2);
 insert Q(0,2,1);
-insert R(0,1);
+insert R(0,5);
 commit dump_changes;
 
 start;

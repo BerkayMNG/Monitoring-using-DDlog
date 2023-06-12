@@ -113,7 +113,7 @@ def main():
                 'subformula_right': {
                     'operator': 'Pred',
                     'name': "R",
-                    'args': [("x1", "s32")], 
+                    'args': [("5", "s32")], 
                     'identifier': 4
                 }
 
