@@ -1,0 +1,33 @@
+input stream Timestamp(tp:u32, ts:u32)
+
+//generating the inputs/the signatures
+{% for symbol, args in signatures -%}
+
+input stream {{symbol-}} (tp:u32
+                    {%-for var_name, type in args -%}
+                    , {{var_name}}:{{type-}}
+                    {%endfor%})
+{% endfor %}
+
+{% with formula=formula %}
+    {% include "formula.dl"%}
+{%endwith%}
+
+{% if formula.identifier == 0 %}
+output relation Output(tp:u32,ts:u32
+            {%-for args_name,type in formula.args -%}
+                ,{{args_name}}:{{type}}
+            {%-endfor-%})
+Output(tp:u32,ts:u32
+        {%-for args_name,type in formula.args -%}
+            ,{{args_name}}:{{type}}
+        {%-endfor-%}) :- Timestamp'(tp,ts), Result_0(
+                                    {%-for args_name,type in formula.args -%}
+                                        {%- if loop.last -%}
+                                            {{args_name}}
+                                        {%- else -%}
+                                            {{args_name}},
+                                        {%- endif -%}
+                                    {%-endfor-%}).
+        
+{% endif%}

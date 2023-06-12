@@ -1,0 +1,19 @@
+relation Result_{{formula.identifier}}(
+        {%-for args_name,type in formula.args -%}
+            {%- if loop.last -%}
+                {{args_name}}:{{type}} 
+            {%- else -%}
+                {{args_name}}:{{type}}, 
+            {%- endif -%} 
+        {%-endfor-%})   
+Result_{{formula.identifier}}(
+{%-for args_name,type in formula.args -%}
+        {%- if loop.last -%}
+            {{args_name}}
+        {%- else -%}
+            {{args_name}},
+        {%- endif -%} 
+        {%-endfor-%})   :- {{ formula.name }}'(tp
+                            {%-for args_name,type in formula.args -%}
+                            , {{args_name}}
+                            {%-endfor-%}).

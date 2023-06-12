@@ -1,0 +1,13 @@
+start;
+insert Timestamp(0,1);
+insert P(0,1,2);
+insert Q(0,2,1);
+insert R(0,1);
+commit dump_changes;
+
+start;
+insert Timestamp(1,1);
+insert P(1,6,5);
+insert Q(1,5,6);
+insert R(1,5);
+commit dump_changes;

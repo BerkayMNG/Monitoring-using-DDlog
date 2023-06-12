@@ -1,0 +1,39 @@
+
+{% with formula=formula.subformula_left%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+{% with formula=formula.subformula_right%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+relation Result_{{formula.identifier}}(
+        {%-for args_name,type in formula.args -%}
+            {%- if loop.last -%}
+                {{args_name}}:{{type}}
+            {%- else -%}
+                {{args_name}}:{{type}},
+            {%- endif -%}
+        {%-endfor-%})
+
+Result_{{formula.identifier}}(
+        {%-for args_name,type in formula.args -%}
+            {%- if loop.last -%}
+                {{args_name}}
+            {%- else -%}
+                {{args_name}},
+            {%- endif -%}
+        {%-endfor-%})   :- Result_
+                    {{-formula.subformula_left.identifier}}({%-for args_name,type in formula.args_left -%}
+                            {%- if loop.last -%}
+                                {{args_name}}
+                            {%- else -%}
+                                {{args_name}},
+                            {%- endif -%}
+                    {%-endfor-%}),  Result_{{formula.subformula_right.identifier}}({%-for args_name,type in formula.args_right -%}
+                            {%- if loop.last -%}
+                                {{args_name}}
+                            {%- else -%}
+                                {{args_name}},
+                            {%- endif -%}
+                    {%-endfor-%}).

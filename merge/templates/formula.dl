@@ -1,0 +1,11 @@
+{% if formula.subformula_left and formula.subformula_right %}
+    {% if formula.operator == "And" %}
+        {% include "and.dl"%}
+
+    {% endif %}
+{% else %}
+    {% if formula.operator == "Pred" %}
+        {% include "predicate.dl"%}
+        
+    {% endif %}
+{% endif %}
