@@ -56,69 +56,31 @@ Gets the nested list representing the formula from a Json file
 def get_Formula(filename_or_path:str) -> list:
     return json.load(open(filename_or_path))
 
+def handle_none(value):
+    return value if value is not None else ''
+
 def main():
     #formula = get_Formula('ex.json')
     signatures = get_signatures("ex.sig")
-    """
-    #Formula : P(x,y) AND Q(y,x)
+    
+
+    #Formula : NOT R(5)
     formula = {
-                'operator': 'And',
+                'operator': 'Exists',
                 'identifier': 0,
-                'args':   [("x0", "s32"), ("x1", "s32")], 
-                'args_left': [("x0", "s32"), ("x1", "s32")],
-                'args_right':[("x1", "s32"), ("x0", "s32")], 
-                'subformula_left': {
+                'sig': ["tp:u32", "id0:s32", "id1:s32"],
+                'args': ["tp","x0", "x1"],
+                'subformula': {
                         'operator': 'Pred',
                         'name': "P",
-                        'args' : [("x0", "s32"), ("x1", "s32")],
+                        'sig': ["tp:u32", "id0:s32", "id2:s32"],
+                        'args': ["tp","x0", "x1"], 
                         'identifier': 1
-                },
-                'subformula_right': {
-                        'operator': 'Pred',
-                        'name': "Q",
-                        'args': [("x1", "s32"), ("x0", "s32")], 
-                        'identifier': 2
                 }
     }
-    """
 
-    #Formula : P(x,y) AND Q(y,x) AND R(y)
-    formula = {
-                'operator': 'And',
-                'identifier': 0,
-                'args':   [("x0", "s32"), ("x1", "s32")], 
-                'args_left': [("x0", "s32"), ("x1", "s32")],
-                'args_right':[("x1", "s32")], 
 
-                'subformula_left': {
-                    'operator': 'And',
-                    'identifier': 1,
-                    'args':   [("x0", "s32"), ("x1", "s32")], 
-                    'args_left': [("x0", "s32"), ("x1", "s32")],
-                    'args_right':[("x1", "s32"), ("x0", "s32")], 
-                    'subformula_left': {
-                            'operator': 'Pred',
-                            'name': "P",
-                            'args' : [("x0", "s32"), ("x1", "s32")],
-                            'identifier': 2
-                    },
-                    'subformula_right': {
-                            'operator': 'Pred',
-                            'name': "Q",
-                            'args': [("x1", "s32"), ("x0", "s32")], 
-                            'identifier': 3
-                    }
-                },
 
-                'subformula_right': {
-                    'operator': 'Pred',
-                    'name': "R",
-                    'args': [("5", "s32")], 
-                    'identifier': 4
-                }
-
-                
-    }
     context = {
          'signatures': signatures,
          'formula': formula
@@ -137,3 +99,118 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+    """
+    #Formula : P(x,y) AND Q(y,x)
+    formula = {
+                'operator': 'And',
+                'identifier': 0,
+                'sig': ["tp:u32", "id0:s32", "id1:s32"],
+                'args':   ["tp","x0","x1"], 
+                'args_left': ["tp","x0","x1"],
+                'args_right':["tp","x1","x0"], 
+                'subformula_left': {
+                        'operator': 'Pred',
+                        'name': "P",
+                        'sig': ["tp:u32", "id0:s32", "id1:s32"],
+                        'args' : ["tp","x0","x1"],
+                        'identifier': 1
+                },
+                'subformula_right': {
+                        'operator': 'Pred',
+                        'name': "Q",
+                        'sig': ["tp:u32", "id0:s32", "id1:s32"],
+                        'args': ["tp","x1","x0"], 
+                        'identifier': 2
+                }
+    }
+    """
+
+    """
+    #Formula : P(x,y) AND Q(y,x) AND R(5)
+    
+    formula = {
+                'operator': 'And',
+                'identifier': 0,
+                'sig': ["tp:u32", "id0:s32", "id1:s32", "id2:s32"],
+                'args':   ["tp","x0","x1", "5"], 
+                'args_left': ["tp","x0","x1"],
+                'args_right': ["tp","5"], 
+
+                'subformula_left': {
+                    'operator': 'And',
+                    'identifier': 1,
+                    'sig': ["tp:u32", "id0:s32", "id1:s32"],
+                    'args':   ["tp","x0","x1"],
+                    'args_left':["tp","x0","x1"],
+                    'args_right':["tp","x1","x0"], 
+                    'subformula_left': {
+                            'operator': 'Pred',
+                            'name': "P",
+                            'sig': ["tp:u32", "id0:s32", "id1:s32"],
+                            'args' : ["tp","x0","x1"],
+                            'identifier': 2
+                    },
+                    'subformula_right': {
+                            'operator': 'Pred',
+                            'name': "Q",
+                            'sig': ["tp:u32", "id0:s32", "id1:s32"],
+                            'args' : ["tp","x1","x0"], 
+                            'identifier': 3
+                    }
+                },
+
+                'subformula_right': {
+                    'operator': 'Pred',
+                    'name': "R",
+                    'sig': ["tp:u32", "id0:s32"],
+                    'args': ["tp","5"], 
+                    'identifier': 4
+                }
+          
+    }
+     
+    """
+
+    """
+    #Formula : NOT R(5)
+
+    formula = {
+                'operator': 'Neg',
+                'identifier': 0,
+                'sig': ["tp:u32", "id0:s32"],
+                'args': ["tp","5"],
+                'subformula': {
+                        'operator': 'Pred',
+                        'name': "R",
+                        'sig': ["tp:u32", "id0:s32"],
+                        'args': ["tp","5"], 
+                        'identifier': 1
+                }
+    }
+    """
+
+    """
+    #Formula : P(x) OR Q(x)
+    formula = {
+                'operator': 'Or',
+                'identifier': 0,
+                'sig': ["tp:u32", "id0:s32"],
+                'args': ["tp","x0"],
+                'subformula_left': {
+                        'operator': 'Pred',
+                        'name': "P",
+                        'sig': ["tp:u32", "id0:s32"],
+                        'args': ["tp","x0"], 
+                        'identifier': 1
+                },
+                'subformula_right': {
+                        'operator': 'Pred',
+                        'name': "Q",
+                        'sig': ["tp:u32", "id0:s32"],
+                        'args': ["tp","x0"], 
+                        'identifier': 2
+                }
+    }
+    """

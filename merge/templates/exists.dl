@@ -1,0 +1,7 @@
+{% with formula=formula.subformula%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+relation Result_{{formula.identifier}}({{formula.subformula.sig | join(', ')}})
+Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Result_{{formula.subformula.identifier}}({{
+    formula.subformula.args |  join(', ')}}).

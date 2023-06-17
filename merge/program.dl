@@ -1,29 +1,17 @@
 input stream Timestamp(tp:u32, ts:u32)
 
-//generating the inputs/the signatures
-input stream P(tp:u32, x0:s32, x1:s32)
-input stream Q(tp:u32, x0:s32, x1:s32)
-input stream R(tp:u32, x0:s32)
+relation Timestamp_buffer(tp:u32, ts:u32)
+Timestamp_buffer(tp, ts) :- Timestamp'(tp,ts).
+Timestamp_buffer(tp, ts) :- Timestamp_buffer-1(tp, ts).
 
 
+  
+input stream P(tp:u32, id0:s32, id2:s32)
+relation Result_1(tp:u32, id0:s32, id2:s32)
+Result_1(tp, x0, x1) :- P'(tp, x0, x1).
+relation Result_0(tp:u32, id0:s32, id2:s32)
+Result_0(tp, x0, x1) :- Result_1(tp, x0, x1).            
 
-relation Result_2(id1:s32 ,id2:s32)   
-Result_2(x0,x1)   :- P'(tp, x0, x1).        
-
-relation Result_3(id1:s32 ,id2:s32)   
-Result_3(x1,x0)   :- Q'(tp, x1, x0).        
-
-relation Result_1(id1:s32 ,id2:s32)
-
-Result_1(x0,x1)   :- Result_2(x0,x1),  Result_3(x1,x0).
-
-relation Result_4(id1:s32)   
-Result_4(5)   :- R'(tp, 5).        
-
-relation Result_0(id1:s32 ,id2:s32)
-
-Result_0(x0,x1)   :- Result_1(x0,x1),  Result_4(x1).
-
-output relation Output(tp:u32,ts:u32,id1:s32,id2:s32)
-Output(tp:u32,ts:u32,x0:s32,x1:s32) :- Timestamp'(tp,ts), Result_0(x0,x1).
-        
+output relation Output(ts:u32, tp:u32, id0:s32, id1:s32) 
+Output(ts, tp, x0, x1) :- Result_0(tp, x0, x1), Timestamp_buffer(tp,ts).
+Output(ts, tp, x0, x1) :- Output-1(ts,tp, x0, x1).

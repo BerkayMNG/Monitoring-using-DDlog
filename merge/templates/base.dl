@@ -1,33 +1,16 @@
 input stream Timestamp(tp:u32, ts:u32)
 
-//generating the inputs/the signatures
-{% for symbol, args in signatures -%}
+relation Timestamp_buffer(tp:u32, ts:u32)
+Timestamp_buffer(tp, ts) :- Timestamp'(tp,ts).
+Timestamp_buffer(tp, ts) :- Timestamp_buffer-1(tp, ts).
 
-input stream {{symbol-}} (tp:u32
-                    {%-for var_name, type in args -%}
-                    , {{var_name}}:{{type-}}
-                    {%endfor%})
-{% endfor %}
 
 {% with formula=formula %}
     {% include "formula.dl"%}
 {%endwith%}
 
 {% if formula.identifier == 0 %}
-output relation Output(tp:u32,ts:u32
-            {%-for args_name,type in formula.args -%}
-                ,id{{loop.index}}:{{type}} 
-            {%-endfor-%})
-Output(tp:u32,ts:u32
-        {%-for args_name,type in formula.args -%}
-            ,{{args_name}}:{{type}}
-        {%-endfor-%}) :- Timestamp'(tp,ts), Result_0(
-                                    {%-for args_name,type in formula.args -%}
-                                        {%- if loop.last -%}
-                                            {{args_name}}
-                                        {%- else -%}
-                                            {{args_name}},
-                                        {%- endif -%}
-                                    {%-endfor-%}).
-        
+output relation Output(ts:u32, {{formula.sig | join(', ')}}) 
+Output(ts, {{formula.args | join(', ')}}) :- Result_0({{formula.args | join(', ')}}), Timestamp_buffer(tp,ts).
+Output(ts, {{formula.args | join(', ')}}) :- Output-1(ts,{{formula.args | join(', ')}}).
 {% endif%}

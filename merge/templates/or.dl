@@ -11,8 +11,8 @@
     {% include "buffer_binary.dl"%}
 {% endwith %}
 
-
 relation Result_{{formula.identifier}}({{formula.sig | join(', ')}})
 Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Buffer_{{
-        formula.identifier}}_left({{formula.subformula_left.args | join(', ')}}), Buffer_{{
+        formula.identifier}}_left({{formula.subformula_left.args | join(', ')}}).   
+Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Buffer_{{
         formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}).

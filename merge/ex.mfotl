@@ -1,1 +1,1 @@
-P(x,y) AND Q(y,x) AND R(5)
+EXISTS x. (Q(x,y) OR Q(y,x))

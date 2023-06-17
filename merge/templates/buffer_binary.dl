@@ -1,0 +1,20 @@
+relation Buffer_{{formula.identifier}}_left({{formula.subformula_left.sig | join(', ')}})
+Buffer_{{formula.identifier}}_left({{formula.subformula_left.args | join(', ')}}) :- Result_{{
+    formula.subformula_left.identifier}}({{formula.subformula_left.args | join(', ')}}).
+Buffer_{{formula.identifier}}_left({{formula.subformula_left.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_left-1({{formula.subformula_left.args | join(', ')}}), MaxTp_{{formula.identifier}}(max), tp >= max.
+
+relation Buffer_{{formula.identifier}}_right({{formula.subformula_right.sig | join(', ')}})
+Buffer_{{formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}) :- Result_{{
+    formula.subformula_right.identifier}}({{formula.subformula_right.args | join(', ')}}).
+Buffer_{{formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_right-1({{formula.subformula_right.args | join(', ')}}), MaxTp_{{formula.identifier}}(max), tp >= max.
+
+relation MinTps_{{formula.identifier}}(tp:u32)
+relation MaxTp_{{formula.identifier}}(tp:u32)
+MinTps_{{formula.identifier}}(min) :- Buffer_{{formula.identifier}}_left-1({{
+    formula.subformula_left.args | join(', ')}}), var min = tp.group_by(()).min().
+MinTps_{{formula.identifier}}(min) :- Buffer_{{formula.identifier}}_right-1({{
+    formula.subformula_right.args | join(', ')}}), var min = tp.group_by(()).min().
+MaxTp_{{formula.identifier}}(max) :- MinTps_{{formula.identifier}}(min), var max = min.group_by(()).max(). 
+

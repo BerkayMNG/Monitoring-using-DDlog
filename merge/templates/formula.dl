@@ -1,11 +1,15 @@
 {% if formula.subformula_left and formula.subformula_right %}
     {% if formula.operator == "And" %}
-        {% include "and.dl"%}
-
+        {% include "and.dl" %}
+    {% elif formula.operator == "Or" %} 
+        {% include "or.dl" %}
     {% endif %}
 {% else %}
     {% if formula.operator == "Pred" %}
-        {% include "predicate.dl"%}
-        
+        {% include "predicate.dl" %}
+    {% elif formula.operator == "Neg" %}  
+        {% include "not.dl" %}
+    {% elif formula.operator == "Exists" %}  
+        {% include "exists.dl" %}            
     {% endif %}
 {% endif %}
