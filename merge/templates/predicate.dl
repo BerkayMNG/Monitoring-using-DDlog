@@ -1,5 +1,6 @@
 input stream {{formula.name}}({{ formula.sig | join(', ')}})
 relation Result_{{formula.identifier}}({{ formula.sig | join(', ')}})
+relation Timestamp_{{formula.identifier}}(tp:u32, ts:u32)
 Result_{{formula.identifier}}({{ 
-                                            formula.args | join(', ')}}) :- {{formula.name}}'({{ formula.args | join(', ')
-                                            }}).
+     formula.args | join(', ')}}) :- {{formula.name}}'({{ formula.args | join(', ')}}).
+Timestamp_{{formula.identifier}}(tp, ts) :- Timestamp'(tp,ts).

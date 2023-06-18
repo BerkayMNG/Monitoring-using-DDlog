@@ -64,22 +64,43 @@ def main():
     signatures = get_signatures("ex.sig")
     
 
-    #Formula : NOT R(5)
+    #Formula : P(x) UNTIL[2,4] (NEXT Q(x,y))
     formula = {
-                'operator': 'Exists',
+                'operator': 'Until',
                 'identifier': 0,
-                'sig': ["tp:u32", "id0:s32", "id1:s32"],
+                'sig': ["tp:u32", "id0:s32","id1:s32"],
                 'args': ["tp","x0", "x1"],
-                'subformula': {
+                'intervall_lw': 2,
+                'intervall_up': 4,
+
+                'subformula_left': {
+                    'operator': 'Pred',
+                    'name': "P",
+                    'sig': ["tp:u32", "id0:s32"],
+                    'args': ["tp","x0"], 
+                    'identifier': 1
+                },
+                'subformula_right': {
+                    'operator': 'Next',
+                    'sig': ["tp:u32", "id0:s32","id1:s32"],
+                    'args': ["tp","x0", "x1"], 
+                    'intervall_lw': 0,
+                    'intervall_up': -1,
+                    'identifier': 2,
+                    'subformula': {
                         'operator': 'Pred',
-                        'name': "P",
-                        'sig': ["tp:u32", "id0:s32", "id2:s32"],
+                        'name': "Q",
+                        'sig': ["tp:u32", "id0:s32","id1:s32"],
                         'args': ["tp","x0", "x1"], 
-                        'identifier': 1
-                }
+                        'identifier': 3  
+                    }
+                },
+
     }
 
 
+    
+                
 
     context = {
          'signatures': signatures,
@@ -214,3 +235,142 @@ if __name__ == '__main__':
                 }
     }
     """
+
+    """
+    #Formula : Exists x. P(x,y)
+
+    formula = {
+                'operator': 'Exists',
+                'identifier': 0,
+                'sig': ["tp:u32", "id0:s32", "id1:s32"],
+                'args': ["tp","x0", "x1"],
+                'subformula': {
+                        'operator': 'Pred',
+                        'name': "P",
+                        'sig': ["tp:u32", "id0:s32", "id2:s32"],
+                        'args': ["tp","x0", "x1"], 
+                        'identifier': 1
+                }
+    }
+    """
+
+"""
+    #Formula : PREV[0,4] (P(x) AND Q(x))
+    formula = {
+                'operator': 'Prev',
+                'identifier': 0,
+                'sig': ["tp:u32", "id0:s32"],
+                'args': ["tp","x0"],
+                'intervall_lw': 0,
+                'intervall_up': 4,
+                'subformula': {
+                        'operator': 'And',
+                        'sig': ["tp:u32", "id0:s32"],
+                        'args': ["tp","x0"], 
+                        'identifier': 1,
+                        'subformula_left': {
+                            'operator': 'Pred',
+                            'name': "P",
+                            'sig': ["tp:u32", "id0:s32"],
+                            'args': ["tp","x0"], 
+                            'identifier': 2
+                        },
+                        'subformula_right': {
+                            'operator': 'Pred',
+                            'name': "Q",
+                            'sig': ["tp:u32", "id0:s32"],
+                            'args': ["tp","x0"], 
+                            'identifier': 3
+                        },
+                }
+    }
+"""
+
+"""
+
+    #Formula : PREV (P(x) AND Q(x))
+    formula = {
+                'operator': 'Prev',
+                'identifier': 0,
+                'sig': ["tp:u32", "id0:s32"],
+                'args': ["tp","x0"],
+                'intervall_lw': 0,
+                'intervall_up': -1,
+                'subformula': {
+                        'operator': 'And',
+                        'sig': ["tp:u32", "id0:s32"],
+                        'args': ["tp","x0"], 
+                        'identifier': 1,
+                        'subformula_left': {
+                            'operator': 'Pred',
+                            'name': "P",
+                            'sig': ["tp:u32", "id0:s32"],
+                            'args': ["tp","x0"], 
+                            'identifier': 2
+                        },
+                        'subformula_right': {
+                            'operator': 'Pred',
+                            'name': "Q",
+                            'sig': ["tp:u32", "id0:s32"],
+                            'args': ["tp","x0"], 
+                            'identifier': 3
+                        },
+                }
+    }
+"""
+
+"""
+    #Formula : P(x) SINCE[2,4] Q(x,y)
+    formula = {
+                'operator': 'Since',
+                'identifier': 0,
+                'sig': ["tp:u32", "id0:s32","id1:s32"],
+                'args': ["tp","x0", "x1"],
+                'intervall_lw': 2,
+                'intervall_up': 4,
+
+                'subformula_left': {
+                    'operator': 'Pred',
+                    'name': "P",
+                    'sig': ["tp:u32", "id0:s32"],
+                    'args': ["tp","x0"], 
+                    'identifier': 1
+                },
+                'subformula_right': {
+                    'operator': 'Pred',
+                    'name': "Q",
+                    'sig': ["tp:u32", "id0:s32","id1:s32"],
+                    'args': ["tp","x0", "x1"], 
+                    'identifier': 2
+                },
+
+    }
+"""
+
+"""
+    #Formula : P(x) UNTIL[2,4] Q(x,y)
+    formula = {
+                'operator': 'Until',
+                'identifier': 0,
+                'sig': ["tp:u32", "id0:s32","id1:s32"],
+                'args': ["tp","x0", "x1"],
+                'intervall_lw': 2,
+                'intervall_up': 4,
+
+                'subformula_left': {
+                    'operator': 'Pred',
+                    'name': "P",
+                    'sig': ["tp:u32", "id0:s32"],
+                    'args': ["tp","x0"], 
+                    'identifier': 1
+                },
+                'subformula_right': {
+                    'operator': 'Pred',
+                    'name': "Q",
+                    'sig': ["tp:u32", "id0:s32","id1:s32"],
+                    'args': ["tp","x0", "x1"], 
+                    'identifier': 2
+                },
+
+    }
+"""

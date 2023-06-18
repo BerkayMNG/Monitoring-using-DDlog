@@ -3,5 +3,7 @@
 {% endwith %}
 
 relation Result_{{formula.identifier}}({{formula.subformula.sig | join(', ')}})
+relation Timestamp_{{formula.identifier}}(tp:u32, ts:u32)
 Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Result_{{formula.subformula.identifier}}({{
     formula.subformula.args |  join(', ')}}).
+Timestamp_{{formula.identifier}}(tp, ts) :- Timestamp_{{formula.subformula.identifier}}(tp,ts).

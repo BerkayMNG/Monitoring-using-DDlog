@@ -1,0 +1,69 @@
+{% with formula=formula.subformula_left%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+{% with formula=formula.subformula_right%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+
+{% with formula=formula %}
+    {% include "buffer_binary.dl"%}
+{% endwith %}
+
+relation Timestamp_{{formula.identifier}}(tp:u32,ts:u32)
+Timestamp_{{formula.identifier}}(tp,ts) :- Current_Timestamp_{{formula.identifier}}(tp,ts).
+
+relation Relevant_{{formula.identifier}}(ts:u32, {{formula.sig | join(', ')}})
+Relevant_{{formula.identifier}}(ts, {{formula.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}), Current_Timestamp_{{
+        formula.identifier}}(tp,ts).
+{% if formula.intervall_up != -1%}
+Relevant_{{formula.identifier}}(ts_old, {{formula.args | join(', ')}}) :- Relevant_{{
+    formula.identifier}}-1(ts_old, {{formula.args | join(', ')}}), Current_Timestamp_{{
+        formula.identifier}}(_,ts), ts - ts_old <= {{formula.intervall_up}}.
+{% else %}
+Relevant_{{formula.identifier}}(ts_old, {{formula.args | join(', ')}}) :- Relevant_{{
+    formula.identifier}}-1(ts_old, {{formula.args | join(', ')}}), Current_Timestamp_{{
+        formula.identifier}}(_,ts).
+{% endif %}
+
+
+relation Tuple_since_{{formula.identifier}}(ts:u32, {{formula.sig | join(', ')}})
+Tuple_since_{{formula.identifier}}(ts, {{formula.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}), Current_Timestamp_{{
+        formula.identifier}}(tp,ts), not Tuple_since_{{formula.identifier}}-1(_, {{
+            formula.args | map('replace', "tp", "_") |  join(', ')}}).
+Tuple_since_{{formula.identifier}}(ts, {{formula.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}), Current_Timestamp_{{
+        formula.identifier}}(tp,ts), not Buffer_{{
+    formula.identifier}}_left(
+        {%-for args_name in formula.subformula_left.args -%}
+            {%- if args_name in formula.subformula_right.args and args_name != "tp" -%}
+                {{args_name}}
+            {%- else -%}
+                _
+            {%- endif -%}
+            {%- if not loop.last -%}
+                , 
+            {%- endif -%}
+        {%-endfor-%}).
+Tuple_since_{{formula.identifier}}(ts, {{formula.args | join(', ')}}) :- Tuple_since_{{
+    formula.identifier}}-1(ts, {{formula.args | join(', ')}}),Buffer_{{
+        formula.identifier}}_left(
+        {%-for args_name in formula.subformula_left.args -%}
+            {%- if args_name in formula.subformula_right.args and args_name != "tp"-%}
+                {{args_name}}
+            {%- else -%}
+                _
+            {%- endif -%}
+            {%- if not loop.last -%}
+                , 
+            {%- endif -%}
+        {%-endfor-%}).
+
+relation Result_{{formula.identifier}}({{formula.sig |join(', ')}})
+Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Tuple_since_{{
+    formula.identifier}}(ts_older, {{formula.args | map('replace', "tp", "_") | join(', ')}}), Current_Timestamp_{{formula.identifier
+    }}(tp,ts_new), Relevant_{{formula.identifier}}(ts_old, {{formula.args | map('replace', "tp", "_") | join(', ')
+    }}), ts_older <= ts_old, ts_new - ts_old >= {{formula.intervall_lw}}.

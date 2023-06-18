@@ -1,1 +1,2 @@
-Q(x:int, y:int)
+P(x:int)
+Q(x:int,y:int)

@@ -1,1 +1,1 @@
-EXISTS x. (Q(x,y) OR Q(y,x))
+P(x) UNTIL[2,4] (NEXT Q(x,y))

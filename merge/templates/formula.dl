@@ -3,6 +3,10 @@
         {% include "and.dl" %}
     {% elif formula.operator == "Or" %} 
         {% include "or.dl" %}
+    {% elif formula.operator == "Since" %} 
+        {% include "since.dl" %}
+    {% elif formula.operator == "Until" %} 
+        {% include "until.dl" %}
     {% endif %}
 {% else %}
     {% if formula.operator == "Pred" %}
@@ -10,6 +14,10 @@
     {% elif formula.operator == "Neg" %}  
         {% include "not.dl" %}
     {% elif formula.operator == "Exists" %}  
-        {% include "exists.dl" %}            
+        {% include "exists.dl" %}
+    {% elif formula.operator == "Prev" %}  
+        {% include "prev.dl" %}
+    {% elif formula.operator == "Next" %}  
+        {% include "next.dl" %}                          
     {% endif %}
 {% endif %}

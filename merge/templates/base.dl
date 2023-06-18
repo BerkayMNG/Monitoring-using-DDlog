@@ -1,16 +1,14 @@
 input stream Timestamp(tp:u32, ts:u32)
 
-relation Timestamp_buffer(tp:u32, ts:u32)
-Timestamp_buffer(tp, ts) :- Timestamp'(tp,ts).
-Timestamp_buffer(tp, ts) :- Timestamp_buffer-1(tp, ts).
 
 
 {% with formula=formula %}
     {% include "formula.dl"%}
 {%endwith%}
 
+
 {% if formula.identifier == 0 %}
 output relation Output(ts:u32, {{formula.sig | join(', ')}}) 
-Output(ts, {{formula.args | join(', ')}}) :- Result_0({{formula.args | join(', ')}}), Timestamp_buffer(tp,ts).
+Output(ts, {{formula.args | join(', ')}}) :- Result_0({{formula.args | join(', ')}}), Timestamp_{{formula.identifier}}(tp,ts).
 Output(ts, {{formula.args | join(', ')}}) :- Output-1(ts,{{formula.args | join(', ')}}).
 {% endif%}
