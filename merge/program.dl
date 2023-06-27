@@ -3,37 +3,29 @@ input stream Timestamp(tp:u32, ts:u32)
 
 
  
-input stream P(tp:u32, id0:s32)
-relation Result_1(tp:u32, id0:s32)
+input stream P(tp:u32, idx0:s32)
+relation Result_1(tp:u32, idx0:s32)
 relation Timestamp_1(tp:u32, ts:u32)
-Result_1(tp, x0) :- P'(tp, x0).
+Result_1(tp, 3) :- P'(tp, 3).
 Timestamp_1(tp, ts) :- Timestamp'(tp,ts).
-  
-input stream Q(tp:u32, id0:s32, id1:s32)
-relation Result_3(tp:u32, id0:s32, id1:s32)
-relation Timestamp_3(tp:u32, ts:u32)
-Result_3(tp, x0, x1) :- Q'(tp, x0, x1).
-Timestamp_3(tp, ts) :- Timestamp'(tp,ts).
-
-relation Result_2(tp:u32, id0:s32, id1:s32)
+input stream Q(tp:u32, idx1:s32)
+relation Result_2(tp:u32, idx1:s32)
 relation Timestamp_2(tp:u32, ts:u32)
-Timestamp_2(tp, ts) :- Timestamp_3-1(tp, ts).
-Result_2(tp_old, x0, x1) :- Result_3(tp, x0, x1), Timestamp_3(tp, ts), Timestamp_2(tp_old, ts_old),  ts - ts_old >= 0, tp_old == tp-1.
-                          
+Result_2(tp, 2) :- Q'(tp, 2).
+Timestamp_2(tp, ts) :- Timestamp'(tp,ts).
 
+relation Buffer_0_left(tp:u32, idx0:s32)
+Buffer_0_left(tp, 3) :- Result_1(tp, 3).
+Buffer_0_left(tp, 3) :- Buffer_0_left-1(tp, 3), MinTpBuffer_0(min), tp > min.
 
-relation Buffer_0_left(tp:u32, id0:s32)
-Buffer_0_left(tp, x0) :- Result_1(tp, x0).
-Buffer_0_left(tp, x0) :- Buffer_0_left-1(tp, x0), MinTpBuffer_0(min), tp > min.
-
-relation Buffer_0_right(tp:u32, id0:s32, id1:s32)
-Buffer_0_right(tp, x0, x1) :- Result_2(tp, x0, x1).
-Buffer_0_right(tp, x0, x1) :- Buffer_0_right-1(tp, x0, x1), MinTpBuffer_0(min), tp > min.
+relation Buffer_0_right(tp:u32, idx1:s32)
+Buffer_0_right(tp, 2) :- Result_2(tp, 2).
+Buffer_0_right(tp, 2) :- Buffer_0_right-1(tp, 2), MinTpBuffer_0(min), tp > min.
 
 relation MaxTpsBuffer_0(tp:u32)
 relation MinTpBuffer_0(tp:u32)
-MaxTpsBuffer_0(max) :- Buffer_0_left-1(tp, x0), var max = tp.group_by(()).max().
-MaxTpsBuffer_0(max) :- Buffer_0_right-1(tp, x0, x1), var max = tp.group_by(()).max().
+MaxTpsBuffer_0(max) :- Buffer_0_left-1(tp, 3), var max = tp.group_by(()).max().
+MaxTpsBuffer_0(max) :- Buffer_0_right-1(tp, 2), var max = tp.group_by(()).max().
 MinTpBuffer_0(min) :- MaxTpsBuffer_0(max), var min = max.group_by(()).min(). 
 
 relation TsBuffer_0_left(tp:u32, ts:u32)
@@ -51,32 +43,12 @@ relation MinTp_TsBuffer_0(tp:u32)
 MaxTps_TsBuffer_0(max) :- TsBuffer_0_left(tp, ts), var max = tp.group_by(()).max().
 MaxTps_TsBuffer_0(max) :- TsBuffer_0_right(tp, ts), var max = tp.group_by(()).max().
 MinTp_TsBuffer_0(min) :- MaxTps_TsBuffer_0(max), var min = max.group_by(()).min().
-
+relation Result_0(tp:u32)
 relation Timestamp_0(tp:u32,ts:u32)
-relation Timestamp_Buffered_0(tp:u32,ts:u32)
-Timestamp_Buffered_0(tp,ts) :- Current_Timestamp_0(tp,ts).
-Timestamp_Buffered_0(tp_old,ts_old) :- Timestamp_Buffered_0-1(tp_old,ts_old), Current_Timestamp_0(tp,ts), ts - ts_old <= 4.
-Timestamp_0(tp_old,ts_old) :- Timestamp_Buffered_0-1(tp_old,ts_old), Current_Timestamp_0(tp,ts), ts - ts_old > 4.
+Result_0(tp) :- Buffer_0_left(tp, 3).   
+Result_0(tp) :- Buffer_0_right(tp, 2).
+Timestamp_0(tp,ts) :- Current_Timestamp_0(tp,ts).
 
-
-relation Relevant_0(ts:u32, tp:u32, id0:s32)
-Relevant_0(ts, tp, x0) :- Buffer_0_left(tp, x0), Current_Timestamp_0(tp,ts).
-Relevant_0(ts_old, tp, x0) :- Relevant_0-1(ts_old, tp, x0), Current_Timestamp_0(_,ts), ts - ts_old <= 4.
-
-
-relation Tuple_chain_0(ts:u32, tp:u32, id0:s32)
-Tuple_chain_0(ts, tp, x0) :- Buffer_0_left(tp, x0), Current_Timestamp_0(tp,ts), not Tuple_chain_0-1(_, _, x0).
-Tuple_chain_0(ts, tp, x0) :- Buffer_0_left(_, x0), Tuple_chain_0-1(ts, tp, x0).
-
-//Don't output yet, just buffer
-relation Satisfied_0(ts:u32, tp:u32, id0:s32, id1:s32)
-Satisfied_0(ts_old, tp, x0, x1) :- Satisfied_0-1(ts_old, tp, x0, x1), Current_Timestamp_0(_,ts), ts - ts_old <= 4.
-Satisfied_0(ts, tp, x0, x1) :- Current_Timestamp_0(tp_new,ts_new), Buffer_0_right(tp_new, x0, x1), Tuple_chain_0-1(ts_old, tp_old, x0), Relevant_0(ts, tp, x0), tp_old <= tp, tp < tp_new, ts_new - ts >= 2.
-Satisfied_0(ts, tp, x0, x1) :- Current_Timestamp_0(tp,ts), Buffer_0_right(tp, x0, x1), 2 == 0.
-    
-relation Result_0(tp:u32, id0:s32, id1:s32)
-Result_0(tp, x0, x1) :- Satisfied_0-1(ts, tp, x0, x1), Current_Timestamp_0(tp_new,ts_new), ts_new - ts > 4.
-
-output relation Output(ts:u32, tp:u32, id0:s32, id1:s32) 
-Output(ts, tp, x0, x1) :- Result_0(tp, x0, x1), Timestamp_0(tp,ts).
-Output(ts, tp, x0, x1) :- Output-1(ts,tp, x0, x1).
+output relation Output(ts:u32, tp:u32) 
+Output(ts, tp) :- Result_0(tp), Timestamp_0(tp,ts).
+Output(ts, tp) :- Output-1(ts,tp).

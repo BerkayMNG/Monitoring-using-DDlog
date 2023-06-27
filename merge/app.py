@@ -129,8 +129,6 @@ if __name__ == '__main__':
                 'identifier': 0,
                 'sig': ["tp:u32", "id0:s32", "id1:s32"],
                 'args':   ["tp","x0","x1"], 
-                'args_left': ["tp","x0","x1"],
-                'args_right':["tp","x1","x0"], 
                 'subformula_left': {
                         'operator': 'Pred',
                         'name': "P",
