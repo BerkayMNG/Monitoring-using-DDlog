@@ -1,0 +1,14 @@
+start;
+insert Timestamp(0,1);
+insert Deleted(0,2,3);
+insert Timestamp(1,1);
+insert Deleted(1,2,10);
+commit dump_changes;
+
+
+start;
+insert Timestamp(2,14);
+insert Deleted(2,1,2);
+insert Deleted(2,5,3);
+commit dump_changes;
+

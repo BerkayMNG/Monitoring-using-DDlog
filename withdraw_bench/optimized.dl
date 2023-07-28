@@ -1,0 +1,21 @@
+input stream Timestamp(tp:s32, ts:s32)
+input stream Withdraw(tp:s32, idx0:s32, idx1:s32) 
+
+
+relation Sub1(ts:s32,c:s32,a:s32,i:s32)
+relation Sub2(tp:s32,c:s32,a:s32,i:s32)
+
+Sub1(ts,c,a,tp) :- Withdraw'(_,c,a), Timestamp'(tp,ts).
+
+Sub2(ts,c,a,i) :- Sub1(ts,c,a,i).
+Sub2(ts_old,c,a,i) :- Sub2-1(ts_old,c,a,i), Timestamp'(_,ts_new), ts_new-ts_old  <= 30.
+
+function sum(g: Group<s32, s32>): s32 {
+    var s = 0;
+    for ((w, m) in g) {
+        s = s + w * (m as s32)
+    };
+    s
+}
+output relation Sum(s:s32, c:s32)
+Sum(s,x0) :-  Sub2(ts, x0, x1, _), var s = x1.group_by(x0).sum(), s > 5000.

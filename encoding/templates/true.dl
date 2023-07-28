@@ -1,0 +1,4 @@
+relation Result_{{formula.identifier}}(tp:s32)
+relation Timestamp_{{formula.identifier}}(tp:s32,ts:s32)
+Result_{{formula.identifier}}(tp) :- Timestamp'(tp,ts).
+Timestamp_{{formula.identifier}}(tp,ts) :- Timestamp'(tp,ts).

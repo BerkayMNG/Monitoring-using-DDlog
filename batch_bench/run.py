@@ -97,15 +97,16 @@ def main():
     plt.xlabel("Number of matching pairs")
     plt.ylabel("runtime [s]")
     plt.legend(loc='best')
-    plt.savefig("comparison.png", dpi = 500)
+    plt.savefig("comparisonWm.png", dpi = 500)
     
-    
+ 
     label = "Monpoly"
     plt.plot(TOTAL_EVENTS,measure_monpoly("cnt"), label=label)
     plt.xlabel("Number of matching pairs")
     plt.ylabel("runtime [s]")
     plt.legend(loc='best')
-    plt.savefig("comparison.png")
+    plt.savefig("comparisonWm.png", dpi = 500)
+    
     
 if __name__ == '__main__':
     main()

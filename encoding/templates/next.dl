@@ -1,0 +1,17 @@
+{% with formula=formula.subformula%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+
+relation Result_{{formula.identifier}}({{formula.sig | join(', ')}})
+relation Timestamp_{{formula.identifier}}(tp:s32, ts:s32)
+Timestamp_{{formula.identifier}}(tp, ts) :- Timestamp_{{formula.subformula.identifier}}-1(tp, ts).
+{% if formula.intervall_up != -1%}
+Result_{{formula.identifier}}({{formula.args| map('replace', "tp", "tp_old") |  join(', ')}}) :- Result_{{formula.subformula.identifier}}({{
+    formula.args | join(', ')}}), Timestamp_{{formula.subformula.identifier}}(tp, ts), Timestamp_{{formula.identifier}}(tp_old, ts_old),  ts - ts_old >= {{
+        formula.intervall_lw}},  ts - ts_old <= {{formula.intervall_up}}, tp_old == tp-1.
+{% else %}
+Result_{{formula.identifier}}({{formula.args| map('replace', "tp", "tp_old") |  join(', ')}}) :- Result_{{formula.subformula.identifier}}({{
+    formula.args | join(', ')}}), Timestamp_{{formula.subformula.identifier}}(tp, ts), Timestamp_{{formula.identifier}}(tp_old, ts_old),  ts - ts_old >= {{
+        formula.intervall_lw}}, tp_old == tp-1.
+{% endif %}

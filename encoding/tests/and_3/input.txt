@@ -1,0 +1,41 @@
+start;
+insert Timestamp(0,1);
+insert P(0,1);
+commit dump_changes;
+ 
+echo --------------------;start;
+insert Timestamp(1,2);
+insert Q(1,1,2);
+commit dump_changes;
+ 
+echo --------------------;start;
+insert Timestamp(2,3);
+insert Q(2,1,2);
+insert P(2,1);
+commit dump_changes;
+ 
+echo --------------------;start;
+insert Timestamp(3,3);
+insert Q(3,1,2);
+insert P(3,2);
+commit dump_changes;
+ 
+echo --------------------;start;
+insert Timestamp(4,4);
+insert Q(4,1,2);
+insert P(4,1);
+commit dump_changes;
+ 
+echo --------------------;start;
+insert Timestamp(5,5);
+insert P(5,3);
+insert Q(5,5,5);
+commit dump_changes;
+ 
+echo --------------------;start;
+insert Timestamp(6,5);
+insert P(6,90);
+insert Q(6,10,10);
+commit dump_changes;
+ 
+echo --------------------;

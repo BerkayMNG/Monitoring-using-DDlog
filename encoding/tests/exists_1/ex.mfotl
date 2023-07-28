@@ -1,0 +1,1 @@
+EXISTS x. (P(x,y) AND Q(x,z))

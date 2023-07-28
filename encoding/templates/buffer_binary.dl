@@ -1,0 +1,32 @@
+relation Buffer_{{formula.identifier}}_left({{formula.subformula_left.sig | join(', ')}})
+Buffer_{{formula.identifier}}_left({{formula.subformula_left.args | join(', ')}}) :- Result_{{
+    formula.subformula_left.identifier}}({{formula.subformula_left.args | join(', ')}}).
+Buffer_{{formula.identifier}}_left({{formula.subformula_left.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_left-1({{formula.subformula_left.args | join(', ')}}), MinTpBuffer_{{formula.identifier}}-1(min), tp > min.
+relation Tp_{{formula.identifier}}_left(tp:s32)
+Tp_{{formula.identifier}}_left(-1) :- Timestamp'(_,_).
+Tp_{{formula.identifier}}_left(tp) :- Timestamp_{{formula.subformula_left.identifier}}(tp,_).
+Tp_{{formula.identifier}}_left(tp) :- Tp_{{formula.identifier}}_left-1(tp), MinTpBuffer_{{formula.identifier}}-1(min), tp > min.
+
+relation Buffer_{{formula.identifier}}_right({{formula.subformula_right.sig | join(', ')}})
+Buffer_{{formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}) :- Result_{{
+    formula.subformula_right.identifier}}({{formula.subformula_right.args | join(', ')}}).
+Buffer_{{formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_right-1({{formula.subformula_right.args | join(', ')}}), MinTpBuffer_{{formula.identifier}}-1(min), tp > min.
+relation Tp_{{formula.identifier}}_right(tp:s32)
+Tp_{{formula.identifier}}_right(-1) :- Timestamp'(_,_).
+Tp_{{formula.identifier}}_right(tp) :- Timestamp_{{formula.subformula_right.identifier}}(tp,_).
+Tp_{{formula.identifier}}_right(tp) :- Tp_{{formula.identifier}}_right-1(tp), MinTpBuffer_{{formula.identifier}}-1(min), tp > min.
+
+relation MaxTpsBuffer_{{formula.identifier}}(tp:s32)
+relation MinTpBuffer_{{formula.identifier}}(tp:s32)
+MaxTpsBuffer_{{formula.identifier}}(max) :- Tp_{{formula.identifier}}_left(tp), var max = tp.group_by(()).max().
+MaxTpsBuffer_{{formula.identifier}}(max) :- Tp_{{formula.identifier}}_right(tp), var max = tp.group_by(()).max().
+MinTpBuffer_{{formula.identifier}}(min) :- MaxTpsBuffer_{{formula.identifier}}(max), var min = max.group_by(()).min(). 
+
+relation TsBuffer_{{formula.identifier}}(tp:s32, ts:s32)
+TsBuffer_{{formula.identifier}}(tp, ts) :- Timestamp'(tp,ts).
+TsBuffer_{{formula.identifier}}(tp, ts) :- TsBuffer_{{formula.identifier}}-1(tp, ts), MinTpBuffer_{{formula.identifier}}-1(min), tp > min.
+relation Current_Timestamp_{{formula.identifier}}(tp:s32, ts:s32)
+Current_Timestamp_{{formula.identifier}}(min,ts) :- TsBuffer_{{formula.identifier}}(min, ts), MinTpBuffer_{{formula.identifier}}(min).
+

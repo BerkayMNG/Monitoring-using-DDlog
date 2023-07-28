@@ -1,0 +1,115 @@
+input stream Timestamp(tp:s32, ts:s32)
+
+import souffle_lib
+
+//generating the inputs/the signatures
+input stream Withdraw(tp:s32, idx0:s32, idx1:s32) 
+
+
+ 
+  
+relation Result_1(tp:s32)
+relation Timestamp_1(tp:s32,ts:s32)
+Result_1(tp) :- Timestamp'(tp,ts).
+Timestamp_1(tp,ts) :- Timestamp'(tp,ts).                       
+
+relation Result_3(tp:s32, idx0:s32, idx1:s32)
+relation Timestamp_3(tp:s32, ts:s32)
+Result_3(tp, x0, x1) :- Withdraw'(tp, x0, x1).
+Timestamp_3(tp, ts) :- Timestamp'(tp,ts).
+relation Result_4(tp:s32, idx2:s32)
+relation Timestamp_4(tp:s32, ts:s32)
+Result_4(tp, tp) :- Timestamp'(tp,ts).
+Timestamp_4(tp, ts) :- Timestamp'(tp,ts).
+
+relation Buffer_2_left(tp:s32, idx0:s32, idx1:s32)
+Buffer_2_left(tp, x0, x1) :- Result_3(tp, x0, x1).
+Buffer_2_left(tp, x0, x1) :- Buffer_2_left-1(tp, x0, x1), MinTpBuffer_2-1(min), tp > min.
+relation Tp_2_left(tp:s32)
+Tp_2_left(-1) :- Timestamp'(_,_).
+Tp_2_left(tp) :- Timestamp_3(tp,_).
+Tp_2_left(tp) :- Tp_2_left-1(tp), MinTpBuffer_2-1(min), tp > min.
+
+relation Buffer_2_right(tp:s32, idx2:s32)
+Buffer_2_right(tp, x2) :- Result_4(tp, x2).
+Buffer_2_right(tp, x2) :- Buffer_2_right-1(tp, x2), MinTpBuffer_2-1(min), tp > min.
+relation Tp_2_right(tp:s32)
+Tp_2_right(-1) :- Timestamp'(_,_).
+Tp_2_right(tp) :- Timestamp_4(tp,_).
+Tp_2_right(tp) :- Tp_2_right-1(tp), MinTpBuffer_2-1(min), tp > min.
+
+relation MaxTpsBuffer_2(tp:s32)
+relation MinTpBuffer_2(tp:s32)
+MaxTpsBuffer_2(max) :- Tp_2_left(tp), var max = tp.group_by(()).max().
+MaxTpsBuffer_2(max) :- Tp_2_right(tp), var max = tp.group_by(()).max().
+MinTpBuffer_2(min) :- MaxTpsBuffer_2(max), var min = max.group_by(()).min(). 
+
+relation TsBuffer_2(tp:s32, ts:s32)
+TsBuffer_2(tp, ts) :- Timestamp'(tp,ts).
+TsBuffer_2(tp, ts) :- TsBuffer_2-1(tp, ts), MinTpBuffer_2-1(min), tp > min.
+relation Current_Timestamp_2(tp:s32, ts:s32)
+Current_Timestamp_2(min,ts) :- TsBuffer_2(min, ts), MinTpBuffer_2(min).
+
+
+relation Result_2(tp:s32, idx0:s32, idx1:s32, idx2:s32)
+relation Timestamp_2(tp:s32,ts:s32)
+Result_2(tp, x0, x1, x2) :- Buffer_2_left(tp, x0, x1), Buffer_2_right(tp, x2).
+Timestamp_2(tp,ts) :- Current_Timestamp_2(tp,ts).
+
+relation Buffer_0_left(tp:s32)
+Buffer_0_left(tp) :- Result_1(tp).
+Buffer_0_left(tp) :- Buffer_0_left-1(tp), MinTpBuffer_0-1(min), tp > min.
+relation Tp_0_left(tp:s32)
+Tp_0_left(-1) :- Timestamp'(_,_).
+Tp_0_left(tp) :- Timestamp_1(tp,_).
+Tp_0_left(tp) :- Tp_0_left-1(tp), MinTpBuffer_0-1(min), tp > min.
+
+relation Buffer_0_right(tp:s32, idx0:s32, idx1:s32, idx2:s32)
+Buffer_0_right(tp, x0, x1, x2) :- Result_2(tp, x0, x1, x2).
+Buffer_0_right(tp, x0, x1, x2) :- Buffer_0_right-1(tp, x0, x1, x2), MinTpBuffer_0-1(min), tp > min.
+relation Tp_0_right(tp:s32)
+Tp_0_right(-1) :- Timestamp'(_,_).
+Tp_0_right(tp) :- Timestamp_2(tp,_).
+Tp_0_right(tp) :- Tp_0_right-1(tp), MinTpBuffer_0-1(min), tp > min.
+
+relation MaxTpsBuffer_0(tp:s32)
+relation MinTpBuffer_0(tp:s32)
+MaxTpsBuffer_0(max) :- Tp_0_left(tp), var max = tp.group_by(()).max().
+MaxTpsBuffer_0(max) :- Tp_0_right(tp), var max = tp.group_by(()).max().
+MinTpBuffer_0(min) :- MaxTpsBuffer_0(max), var min = max.group_by(()).min(). 
+
+relation TsBuffer_0(tp:s32, ts:s32)
+TsBuffer_0(tp, ts) :- Timestamp'(tp,ts).
+TsBuffer_0(tp, ts) :- TsBuffer_0-1(tp, ts), MinTpBuffer_0-1(min), tp > min.
+relation Current_Timestamp_0(tp:s32, ts:s32)
+Current_Timestamp_0(min,ts) :- TsBuffer_0(min, ts), MinTpBuffer_0(min).
+
+relation Timestamp_0(tp:s32,ts:s32)
+Timestamp_0(tp,ts) :- Current_Timestamp_0(tp,ts).
+
+relation Relevant_0(ts:s32, tp:s32, idx0:s32, idx1:s32, idx2:s32)
+Relevant_0(ts, tp, x0, x1, x2) :- Buffer_0_right(tp, x0, x1, x2), Current_Timestamp_0(tp,ts).
+Relevant_0(ts_old, tp, x0, x1, x2) :- Relevant_0-1(ts_old, tp, x0, x1, x2), Current_Timestamp_0(_,ts), ts - ts_old <= 30.
+
+
+relation Tuple_since_0(ts:s32, tp:s32, idx0:s32, idx1:s32, idx2:s32)
+Tuple_since_0(ts, tp, x0, x1, x2) :- Buffer_0_right(tp, x0, x1, x2), Current_Timestamp_0(tp,ts), not Tuple_since_0-1(_, _, x0, x1, x2).
+Tuple_since_0(ts, tp, x0, x1, x2) :- Buffer_0_right(tp, x0, x1, x2), Current_Timestamp_0(tp,ts), not Buffer_0_left(_).
+Tuple_since_0(ts, tp, x0, x1, x2) :- Tuple_since_0-1(ts, tp, x0, x1, x2),Buffer_0_left(_).
+
+relation Result_0(tp:s32, idx0:s32, idx1:s32, idx2:s32)
+Result_0(tp, x0, x1, x2) :- Tuple_since_0(ts_older, _, x0, x1, x2), Current_Timestamp_0(tp,ts_new), Relevant_0(ts_old, _, x0, x1, x2), ts_older <= ts_old, ts_new - ts_old >= 0.
+
+
+function sum(g: Group<s32, s32>): s32 {
+    var s = 0;
+    for ((w, m) in g) {
+        s = s + w * (m as s32)
+    };
+    s
+}
+relation Sum(s:s32, c:s32)
+Sum(s,x0) :-  Result_0(tp, x0, x1, _), var s = x1.group_by(x0).sum().
+
+output relation Output(ts:s32,tp:s32,sum:s32,client:s32)
+Output(ts,tp,sum,client) :- Sum(sum,client), Timestamp'(tp,ts), sum > 5000.

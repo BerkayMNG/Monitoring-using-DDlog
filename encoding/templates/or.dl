@@ -1,0 +1,20 @@
+{% with formula=formula.subformula_left%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+{% with formula=formula.subformula_right%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+
+{% with formula=formula %}
+    {% include "buffer_binary.dl"%}
+{% endwith %}
+
+relation Result_{{formula.identifier}}({{formula.sig | join(', ')}})
+relation Timestamp_{{formula.identifier}}(tp:s32,ts:s32)
+Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Buffer_{{
+        formula.identifier}}_left({{formula.subformula_left.args | join(', ')}}).   
+Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Buffer_{{
+        formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}).
+Timestamp_{{formula.identifier}}(tp,ts) :- Current_Timestamp_{{formula.identifier}}(tp,ts).

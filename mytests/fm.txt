@@ -1,0 +1,1 @@
+["And",["Pred","P",[["Var",["Nat",0]],["Var",["Nat",1]]]],["Neg",["Pred","Q",[["Var",["Nat",0]]]]]]

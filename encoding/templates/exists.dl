@@ -1,0 +1,9 @@
+{% with formula=formula.subformula%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+relation Result_{{formula.identifier}}({{formula.sig | join(', ')}})
+relation Timestamp_{{formula.identifier}}(tp:s32, ts:s32)
+Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Result_{{formula.subformula.identifier}}({{
+    formula.subformula.args |  join(', ')}}).
+Timestamp_{{formula.identifier}}(tp, ts) :- Timestamp_{{formula.subformula.identifier}}(tp,ts).

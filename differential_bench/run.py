@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 # Parameters
 SEED = 20230508
 REP = 3
-TOTAL_EVENTS = [i*5000 for i in range(1,20,3)]
-TP_PER_TS = 10
+TOTAL_EVENTS = [i*3000 for i in range(1,25,2)]
+#TP_PER_TS = 10
+TP_PER_TS = 1
 EV_PER_TP = 2
 MAX_VALUE = 1_000_000_000
 PROGRAMS = ["no_batching"]

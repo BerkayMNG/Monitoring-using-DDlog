@@ -1,9 +1,0 @@
-{% with formula=formula.subformula%}
-    {% include "formula.dl"%}
-{% endwith %}
-
-relation Result_{{formula.identifier}}({{formula.subformula.sig | join(', ')}})
-relation Timestamp_{{formula.identifier}}(tp:u32, ts:u32)
-Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Timestamp_{{formula.subformula.identifier}}(tp,ts), not Result_{{formula.subformula.identifier}}({{
-    formula.subformula.args | map('replace', "tp", "_") | join(', ')}}).
-Timestamp_{{formula.identifier}}(tp, ts) :- Timestamp_{{formula.subformula.identifier}}(tp,ts).

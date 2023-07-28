@@ -1,0 +1,7 @@
+relation Result_{{formula.identifier}}({{ formula.sig | join(', ')}})
+relation Timestamp_{{formula.identifier}}(tp:s32, ts:s32)
+Result_{{formula.identifier}}({{ 
+     formula.args | join(', ')}}) :- {{formula.name}}'({{ formula.sub_args | join(', ')}}){% if formula.constraints != [] -%}
+ ,{{- formula.constraints | join(', ') -}}
+{%- endif -%}.
+Timestamp_{{formula.identifier}}(tp, ts) :- Timestamp'(tp,ts).

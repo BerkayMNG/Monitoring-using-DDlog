@@ -1,0 +1,56 @@
+{% with formula=formula.subformula_left%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+{% with formula=formula.subformula_right%}
+    {% include "formula.dl"%}
+{% endwith %}
+
+
+{% with formula=formula %}
+    {% include "buffer_binary.dl"%}
+{% endwith %}
+
+
+relation Timestamp_{{formula.identifier}}(tp:s32,ts:s32)
+relation Timestamp_Buffered_{{formula.identifier}}(tp:s32,ts:s32)
+Timestamp_Buffered_{{formula.identifier}}(tp,ts) :- Current_Timestamp_{{formula.identifier}}(tp,ts).
+Timestamp_Buffered_{{formula.identifier}}(tp_old,ts_old) :- Timestamp_Buffered_{{
+    formula.identifier}}-1(tp_old,ts_old), Current_Timestamp_{{formula.identifier}}(tp,ts), ts - ts_old <= {{formula.intervall_up}}.
+Timestamp_{{formula.identifier}}(tp_old,ts_old) :- Timestamp_Buffered_{{formula.identifier}}-1(tp_old,ts_old), Current_Timestamp_{{formula.identifier
+    }}(tp,ts), ts - ts_old > {{formula.intervall_up}}.
+
+
+relation Relevant_{{formula.identifier}}(ts:s32, {{formula.subformula_left.sig | join(', ')}})
+Relevant_{{formula.identifier}}(ts, {{formula.subformula_left.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_left({{formula.subformula_left.args | join(', ')}}), Current_Timestamp_{{
+        formula.identifier}}(tp,ts).
+Relevant_{{formula.identifier}}(ts_old, {{formula.subformula_left.args | join(', ')}}) :- Relevant_{{
+    formula.identifier}}-1(ts_old, {{formula.subformula_left.args | join(', ')}}), Current_Timestamp_{{
+        formula.identifier}}(_,ts), ts - ts_old <= {{formula.intervall_up}}.
+
+
+relation Tuple_chain_{{formula.identifier}}(ts:s32, {{formula.subformula_left.sig | join(', ')}})
+Tuple_chain_{{formula.identifier}}(ts, {{formula.subformula_left.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_left({{formula.subformula_left.args | join(', ')}}), Current_Timestamp_{{
+        formula.identifier}}(tp,ts), not Tuple_chain_{{formula.identifier}}-1(_, {{
+            formula.subformula_left.args | map('replace', "tp", "_") |  join(', ')}}).
+Tuple_chain_{{formula.identifier}}(ts, {{formula.subformula_left.args | join(', ')}}) :- Buffer_{{
+    formula.identifier}}_left({{formula.subformula_left.args | map('replace', "tp", "_") | join(', ')
+    }}), Tuple_chain_{{formula.identifier}}-1(ts, {{formula.subformula_left.args |   join(', ')}}).
+
+//Don't output yet, just buffer
+relation Satisfied_{{formula.identifier}}(ts:s32, {{formula.sig | join(', ')}})
+Satisfied_{{formula.identifier}}(ts_old, {{formula.args | join(', ')}}) :- Satisfied_{{formula.identifier}}-1(ts_old, {{
+    formula.args | join(', ') }}), Current_Timestamp_{{formula.identifier}}(_,ts), ts - ts_old <= {{formula.intervall_up}}.
+Satisfied_{{formula.identifier}}(ts, {{formula.args | join(', ')}}) :- Current_Timestamp_{{formula.identifier
+    }}(tp_new,ts_new), Buffer_{{formula.identifier}}_right({{formula.subformula_right.args | map('replace', "tp", "tp_new") | join(', ')
+    }}), Tuple_chain_{{formula.identifier}}-1(ts_old, {{formula.subformula_left.args | map('replace', "tp", "tp_old") |  join(', ')
+    }}), Relevant_{{formula.identifier}}(ts, {{formula.subformula_left.args | join(', ')
+    }}), tp_old <= tp, tp < tp_new, ts_new - ts >= {{formula.intervall_lw}}.
+Satisfied_{{formula.identifier}}(ts, {{formula.args | join(', ')}}) :- Current_Timestamp_{{formula.identifier
+    }}(tp,ts), Buffer_{{formula.identifier}}_right({{formula.subformula_right.args | join(', ')}}), {{formula.intervall_lw}} == 0.
+    
+relation Result_{{formula.identifier}}({{formula.sig | join(', ')}})
+Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Satisfied_{{formula.identifier}}-1(ts, {{formula.args | join(', ')
+}}), Current_Timestamp_{{formula.identifier}}(tp_new,ts_new), ts_new - ts > {{formula.intervall_up}}.

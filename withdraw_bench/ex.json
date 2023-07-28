@@ -1,0 +1,1 @@
+["And",["Agg",["Nat",0],[["Agg_Sum"],["EInt",0]],["Nat",2],["Var",["Nat",0]],["Since",["Eq",["Const",["EInt",0]],["Const",["EInt",0]]],[["Nat",0],["Enat",["Nat",30]]],["And",["Pred","Withdraw",[["Var",["Nat",3]],["Var",["Nat",0]]]],["TP",["Var",["Nat",1]]]]]],["Neg",["LessEq",["Var",["Nat",0]],["Const",["EInt",5000]]]]]

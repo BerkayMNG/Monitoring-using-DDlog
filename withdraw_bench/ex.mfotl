@@ -1,0 +1,1 @@
+(s <- SUM a;c (ONCE[0,30](Withdraw(c,a) AND tp(i)))) IMPLIES s <= 5000

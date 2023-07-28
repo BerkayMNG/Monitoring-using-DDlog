@@ -1,0 +1,17 @@
+input stream Timestamp(tp:s32, ts:s32)
+
+//generating the inputs/the signatures
+{% for symbol, _, args in signatures -%}
+input stream {{symbol-}} ({{args | join(', ')}}) 
+{% endfor %}
+
+{% with formula=formula %}
+    {% include "formula.dl"%}
+{%endwith%}
+
+
+{% if formula.identifier == 0 %}
+output relation Output(ts:s32, {{formula.sig | join(', ')}}) 
+Output(ts, {{formula.args | join(', ')}}) :- Result_0({{formula.args | join(', ')}}), Timestamp_{{formula.identifier}}(tp,ts).
+Output(ts, {{formula.args | join(', ')}}) :- Output-1(ts,{{formula.args | join(', ')}}).
+{% endif%}
