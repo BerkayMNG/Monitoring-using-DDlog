@@ -8,7 +8,7 @@ import warnings
 BINARY_OP = ["And", "Or", "Since", "Until", "Eq"]
 UNARY_OP = ["Pred", "Prev", "Next", "Exists", "Neg"]
 SIGNATURES = []
-PATH = "../withdraw_bench"
+PATH = "./tests/and_2"
 
 
 def merger(subformula_left:dict, subformula_right:dict) -> tuple[list, list, list]:

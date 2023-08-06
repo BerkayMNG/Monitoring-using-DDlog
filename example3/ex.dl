@@ -1,0 +1,23 @@
+input stream Timestamp(tp:u32, ts:s32)
+input stream P(tp:u32, id:u32)
+input stream Q(tp:u32, id:u32)
+
+relation Once_P(tp:u32, id: u32)
+relation Once_Q(tp:u32, id: u32)
+Once_P(tp,id) :- P'(tp,id).
+Once_P(tp,id) :- Once_P-1(tp,id).
+Once_Q(tp,id) :- Q'(tp,id).
+Once_Q(tp,id) :- Once_Q-1(tp,id).
+
+
+relation Min_Once_P(tp:u32, id:u32)
+relation Min_Once_Q(tp:u32, id:u32)
+Min_Once_P(min,id)   :- Once_P(tp,id), 
+                        var min = tp.group_by((id)).min().
+Min_Once_Q(min,id)   :- Once_Q(tp,id), 
+                        var min = tp.group_by((id)).min().
+
+output relation Report(tp:u32, id: u32)
+Report(max,id)        :- Min_Once_P(tp1,id), 
+                         Min_Once_Q(tp2,id),
+                         var max = max(tp1,tp2).

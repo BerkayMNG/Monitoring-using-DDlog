@@ -4,14 +4,15 @@ import matplotlib.pyplot as plt
 
 # Parameters
 SEED = 20230508
-REP = 3
-TOTAL_EVENTS = [i*3000 for i in range(1,25,2)]
+REP = 5
+#TOTAL_EVENTS = [i*3000 for i in range(1,25,2)]
+TOTAL_EVENTS = [i*300 for i in range(1,25,2)]
 #TP_PER_TS = 10
 TP_PER_TS = 1
 EV_PER_TP = 2
 MAX_VALUE = 1_000_000_000
-PROGRAMS = ["no_batching"]
-BATCH_SIZES = [1, 5]
+PROGRAMS = ["no_batching", "batching", "batching_new"]
+BATCH_SIZES = [1,5]
 
 random.seed(SEED)
 
@@ -101,31 +102,42 @@ def measure_monpoly(program: str) -> list[float]:
 
 
 def main():
-    for program in PROGRAMS:
+    for program in ["no_batching"]:
         bsz = [1] if program == "no_batching" else BATCH_SIZES
         for batch_size in bsz:
-            label = f"{program}, batch size {batch_size}"
+            if program == "no_batching":
+                label = f"non-batched"
+            elif program == "batching":
+                label = f"batched old, batch size {batch_size}"
+            else:
+                label = f"batched new, batch size {batch_size}"
             plt.plot(TOTAL_EVENTS, measure_series(program, batch_size), label=label)
-    plt.xlabel("number total events")
+    plt.xlabel("Number of total events")
     plt.ylabel("runtime [s]")
     plt.legend(loc='best')
-    plt.savefig("comparison4.png")
+    plt.savefig("comparison4.png", dpi = 500)
 
 def main2():
-    for program in PROGRAMS:
+    for program in ["no_batching"]:
         bsz = [1] if program == "no_batching" else BATCH_SIZES
         for batch_size in bsz:
-            label = f"{program}, batch size {batch_size}"
+            if program == "no_batching":
+                label = f"non-batched"
+            elif program == "batching":
+                label = f"batched old, batch size {batch_size}"
+            else:
+                label = f"batched new, batch size {batch_size}"
             plt.plot(TOTAL_EVENTS, measure_series(program, batch_size), label=label)
 
 
     label = "Monpoly"
     plt.plot(TOTAL_EVENTS,measure_monpoly("exp"), label=label)
-    plt.xlabel("number total events")
+    plt.xlabel("Number of total events")
     plt.ylabel("runtime [s]")
     plt.legend(loc='best')
-    plt.savefig("comparison_monpoly.png")
+    plt.savefig("comparison_monpoly.png", dpi = 500)
 
 
 if __name__ == '__main__':
-    main2()
+    main()
+    

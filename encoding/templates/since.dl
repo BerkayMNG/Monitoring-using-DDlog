@@ -60,7 +60,8 @@ Tuple_since_{{formula.identifier}}(ts, {{formula.args | join(', ')}}) :- Tuple_s
             {%- if not loop.last -%}
                 , 
             {%- endif -%}
-        {%-endfor-%}).
+        {%-endfor-%}), Relevant_{{formula.identifier}}(ts_old, {{formula.args | map('replace', "tp", "_") | join(', ')
+    }}).
 
 relation Result_{{formula.identifier}}({{formula.sig |join(', ')}})
 Result_{{formula.identifier}}({{formula.args | join(', ')}}) :- Tuple_since_{{

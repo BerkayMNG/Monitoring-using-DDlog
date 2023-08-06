@@ -1,0 +1,7 @@
+input stream Timestamp(tp:s32, ts:s32)
+input stream Deleted(tp:s32, m_id:s32, price:s32)
+output relation Suspected(tp:s32, ts:s32, m_id:s32, p:s32)
+
+Suspected(tp,ts,m_id, p)    :- Deleted'(tp,m_id,p), 
+                               Timestamp'(tp,ts),
+                               p >= 7.

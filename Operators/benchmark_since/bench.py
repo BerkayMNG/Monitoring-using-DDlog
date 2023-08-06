@@ -2,7 +2,7 @@ import random
 import subprocess
 import matplotlib.pyplot as plt
 
-REP = 20
+REP = 10
 MAX_VALUE = 2000
 MIN_VALUE = 200
 PATH = "../since/"
@@ -25,20 +25,8 @@ def filter_window(ts_new:int, max:int, cache:Window) -> Window:
 def filter_with_probability(probability:float) -> bool:
     return random.random() < probability
 
-def event_generator_1(num_ts:int, evr:int, p:float,intervall_max:int) -> Trace:
-    events = []
-    cache = []
-    for ts in range(num_ts):
-        cache = filter_window(ts,intervall_max,cache)
-        curr_events = [("P", elem) for _,elem in cache if filter_with_probability(p)]
-        for _ in range(evr):
-            elem = random.randint(0, MAX_VALUE)
-            cache.append((ts,elem))
-            curr_events.append(("Q", elem))
-        events.append((ts, curr_events))
-    return events
 
-def event_generator_2(num_ts:int, evr:int, p:float,intervall_max:int) -> Trace:
+def event_generator_1(num_ts:int, evr:int, p:float,intervall_max:int) -> Trace:
     events = []
     cache = []
     for ts in range(num_ts):
@@ -58,18 +46,20 @@ def event_generator_2(num_ts:int, evr:int, p:float,intervall_max:int) -> Trace:
         events.append((ts, curr_events))
     return events
 
-def event_generator_3(num_ts:int, evr:int, p:float,intervall_max:int) -> Trace:
-    events = []
-    cache = []
-    for ts in range(num_ts):
-        curr_events = [("P", elem) for elem in cache if filter_with_probability(p)]
-        for elem in range(evr):
-            cache.append(elem)
-            curr_events.append(("Q", elem))
-        events.append((ts, curr_events))
-    return events
 
-def event_generator_4(num_ts:int, evr:int, p:float,intervall_max:int) -> Trace:
+"""
+Observe that evr, p and intervall_max are not used here.
+It is included because originally there were more 
+event_generator functions, who all had the below signature 
+except this one. This simplified the generation of the 
+events for the measuring functions, since they only needed the 
+name of the event_generator. However, 
+most of the other generators are discarded but the 
+signature is unchanged since it is highly coupled 
+with the  measure_ddlog(), measure_MonPoly() 
+and event_generator() functions.
+"""
+def event_generator_2(num_ts:int, evr:int, p:float,intervall_max:int) -> Trace:
     #id pool consists of [1,2,3,..200]
     events = []
 
@@ -117,25 +107,21 @@ def measure_ddlog(func, numt_ts:int, evr:int, p:float, intervall_min:int,interva
 
     mem_acc = 0.0
     time_acc = 0.0
-    with open('newest.txt', 'a') as file:
-        for _ in range(0, REP):
-            with open(input_file, 'rb') as input:
-                proc = subprocess.run(args, stdin=input, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-            proc.check_returncode()
-            measurements = proc.stderr.decode().strip().split()
-            elapsed, mem = [float(item.strip("'")) for item in measurements]
-            time_acc += float(elapsed)
-            mem_acc += float(mem)
-        avg = time_acc / REP
-        avg_mem =  mem_acc / REP
-        file.write("\n")
-        file.write(f"events {numt_ts*evr:.2f}\n")
-        file.write(f"memory {avg_mem:.2f}\n")
-        file.write(f"{avg:.2f}\n")
-        print(f"{avg:.2f}\n")
+
+    for _ in range(0, REP):
+        with open(input_file, 'rb') as input:
+            proc = subprocess.run(args, stdin=input, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        proc.check_returncode()
+        measurements = proc.stderr.decode().strip().split()
+        elapsed, mem = [float(item.replace("'", "")) for item in measurements]
+        time_acc += float(elapsed)
+        mem_acc += float(mem)
+    avg = time_acc / REP
+    avg_mem =  mem_acc / REP
+    print(f"{avg:.2f}\n")
 
     subprocess.run(["rm", input_file])
-    return avg
+    return avg, round(avg_mem/1024.0)
 
 def event_generator(func, num_ts:int, evr:int, p:float,intervall_max:int) -> Trace:
     return func(num_ts,evr,p,intervall_max)
@@ -162,124 +148,83 @@ def measure_MonPoly(func,numt_ts:int, evr:int, p:float, intervall_min:int,interv
 
     mem_acc = 0.0
     time_acc = 0.0
-    with open('result_01.txt', 'a') as file:
-        for _ in range(0, REP):
-            proc = subprocess.run(args,stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
-            proc.check_returncode()
-            measurements = proc.stderr.decode().strip().split()
-            elapsed, mem = [float(item.strip("'")) for item in measurements]
-            time_acc += float(elapsed)
-            mem_acc += float(mem)
-        avg = time_acc / REP
-        avg_mem =  mem_acc / REP
-        file.write("\n")
-        file.write(f"events {numt_ts*100:.2f}\n")
-        file.write(f"memory {avg_mem:.2f}\n")
-        file.write(f"{avg:.2f}\n")
-        print(f"{avg:.2f}\n")
+
+    for _ in range(0, REP):
+        proc = subprocess.run(args,stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
+        proc.check_returncode()
+        measurements = proc.stderr.decode().strip().split()
+        elapsed, mem = [float(item.replace("'", "")) for item in measurements]
+        time_acc += float(elapsed)
+        mem_acc += float(mem)
+    avg = time_acc / REP
+    avg_mem =  mem_acc / REP
+    print(f"{avg:.2f}\n")
 
     subprocess.run(["rm", mftol_file])
     subprocess.run(["rm", log_file])
     subprocess.run(["rm", sig_file])
     
-    return avg
+    return avg, round(avg_mem/1024.0)
 
 
-def plot(program:str, x:list[int], y:list[int], description:str = ""):
-    plt.plot(x,y,label=program + ", "+ description)
+def plot(program:str, x:list[int], y:list[int], id:int):
+    plt.figure(id)
+    plt.plot(x,y,label=program)
     plt.legend(loc='best')
 
-
-
-"""
-For each id occured as Q(id) within the window, prob. p decides wheter id follows in next ts as
-P(id). Since Q(id) (with same id) are not likely to occur repeatedly, since1 should be at least slightly
-faster, because it uses the simplest logic whereas the other two involve more rules/aggregation.
-"""
-def bench1():
-    #parameters for bench
-    distinct_ts = [500, 1_000, 1_500, 2_000, 2_500]
-    evr = 2
-
-    intervall_min = 2
-    intervall_max = 4
-
-    x = [i//evr for i in distinct_ts]
-    exp = 1
-    for p in [0.01, 0.5, 0.99]:
-        for program in PROGAMS:
-            print()
-            print()
-            print(f'program: {program}, prob. = {p}')
-            args_ddlog = ["/usr/bin/time", "-f'%e %M'", f"{PATH}{program}_ddlog/target/release/{program}_cli"]
-            y_ddlog = [measure_ddlog(event_generator_1,ts,evr,p,intervall_min,intervall_max,args_ddlog) for ts in x]
-            plot(program,x,y_ddlog)
-
-        plt.xlabel("number Q events")
-        plt.ylabel("runtime[s]")
-        #plt.title(f"p={p}")
-        plt.savefig(f"./since_plots/bench1/exp{exp}",dpi=500)
-        plt.close()
-        exp +=1
-    #plot("monpoly", total_events, [measure_MonPoly(event_generator_1,ts,evr,p,intervall_min, intervall_max) for ts in total_events], f'prob. = {p}')
-
+def figure(x_label:str, y_label:str, path:str,id:int):
+        plt.figure(id)
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        plt.savefig(path,dpi=500)
+        plt.close(id)
 
 """
 Assumption/idea: since1 will keep a lot of outdated tuples because "chains" never stop and 
 new id's enter frequently. Since2 and Since3 should perform much better due to "garbage collecting"
 """
-def bench2():
-    total_events = [i*3000 for i in range(1,30,5)]
+def bench1():
+    total_events = [i*1000 for i in range(1,30,3)]
     evr = 100
 
     intervall_min = 2
     intervall_max = 15
 
     x = [i//evr for i in total_events]
-    x_ev = [i*evr for i in x]
-    exp = 4
+    exp = 0
     
     for p in [0.9999]:
         for program in PROGAMS:
             print(f'program: {program}, prob. = {p}')
             args_ddlog = ["/usr/bin/time", "-f'%e %M'", f"{PATH}{program}_ddlog/target/release/{program}_cli"]
-            y_ddlog = [measure_ddlog(event_generator_2,ts,evr,p,intervall_min,intervall_max,args_ddlog) for ts in x]
-            plot(program,x_ev,y_ddlog)
-        
-
-        plt.xlabel("number Q events")
-        plt.ylabel("runtime[s]")
-        plt.title(f"p={p}")
-        plt.savefig(f"./since_plots/bench2/exp{exp}",dpi=500)
-        plt.close()
+            arr = [measure_ddlog(event_generator_1,ts,evr,p,intervall_min,intervall_max,args_ddlog) for ts in x]
+            runtime = [x[0] for x in arr]
+            mem = [x[1] for x in arr]
+            plot(program,x,runtime,2*exp)
+            plot(program,x,mem,2*exp+1)
+            
+            
+        figure("Number of timepoints","runtime[s]", f"./since_plots/bench1/runtime_ddlog_{exp}",2*exp)
+        #figure("Number of timepoints","memory usage[MiB]", f"./since_plots/bench1/memory_ddlog_{exp}",2*exp+1)
         exp +=1
 
-"""
-don't know, i was tired and tried new stuff
-But does increase eventrate and keeps numt_ts constant- since we observe every Q once,
-we should (maybe) be faster with since2.dl and/or since3.dl when p is really high (filters out irrelevant
-tuples)
-"""
-def bench3():
-    num_ts = 2000
-    p = 0.99
 
-    intervall_min = 3
-    intervall_max = 20
-    x = [10,20,30,40,50,60,70,80,90,100]
+    
 
-    exp = 1
-    for program in PROGAMS:
-        print(f'program: {program}, prob. = {p}')
-        args_ddlog = ["/usr/bin/time", "-f", "%e", f"{PATH}{program}_ddlog/target/release/{program}_cli"]
-        y_ddlog = [measure_ddlog(event_generator_3,round(num_ts/evr),evr,p,intervall_min,intervall_max,args_ddlog) for evr in x]
-        plot(program,x,y_ddlog)
+    exp = 0
+    for p in [0.9999]:
+        print(f'program: MonPoly, prob. = {p}')
+        arr = [measure_MonPoly(event_generator_1,ts,evr,p,intervall_min,intervall_max) for ts in x]
+        runtime = [x[0] for x in arr]
+        mem = [x[1] for x in arr]
+        plot("MonPoly",x,runtime,2*exp)
+        plot("MonPoly",x,mem,2*exp+1)
 
-    plt.xlabel("evr")
-    plt.ylabel("runtime[s]")
-    plt.title(f"Constant number of distinct ts (={num_ts})")
-    plt.savefig(f"./since_plots/bench3/exp{exp}",dpi=500)
-    plt.close()
+
+        figure("Number of timepoints","runtime[s]", f"./since_plots/bench1/runtime_monpoly_{exp}",2*exp)
+        figure("Number of timepoints","memory usage[MiB]", f"./since_plots/bench1/memory_{exp}",2*exp+1)
+        exp += 1
+
 
 
 """
@@ -287,64 +232,52 @@ Pool of "ids"- p(id) always occurs, whereas Q(id) occurs for each id 2 tp later 
 Thus, since3 does much more work than the other 2 versions due to the group_by.
 since2 should be worse than since1, because it does more work but obtains the same result.
 probability is not used here. 
+
 """
-def bench4():
-    total_events = [i*50 for i in range(1,10,2)]
-    evr = 2
+def bench2():
+    total_events = [i*70 for i in range(1,10,1)]
+    evr = -1 #not used
 
     intervall_min = 2
     intervall_max = 25
 
     x = [i for i in total_events]
-    exp = 4
-    p = 0 #p not used
+    exp = 0
+    p = -1 #p not used
     for program in PROGAMS:
         print(f'program: {program}, prob. = {p}')
-        args_ddlog = ["/usr/bin/time", "-f'%e %M'", f"{PATH}{program}_ddlog/target/release/{program}_cli"]
-        y_ddlog = [measure_ddlog(event_generator_4,ts,evr,0,intervall_min,intervall_max,args_ddlog) for ts in x] #p not used
-        plot(program,x,y_ddlog)
+        args_ddlog = ["/usr/bin/time", "-f'%e %M ", f"{PATH}{program}_ddlog/target/release/{program}_cli"]
+        arr = [measure_ddlog(event_generator_2,ts,evr,p,intervall_min,intervall_max,args_ddlog) for ts in x]
+        runtime = [x[0] for x in arr]
+        mem = [x[1] for x in arr]
+        plot(program,x,runtime,2*exp)
+        plot(program,x,mem,2*exp+1)
+    
+    figure("Number of timepoints","runtime[s]", f"./since_plots/bench2/runtime_ddlog",2*exp)
+    #figure("Number of timepoints","memory usage[MiB]", f"./since_plots/bench2/memory_ddlog",2*exp+1)
 
-    plt.xlabel("number timepoints")
-    plt.ylabel("runtime[s]")
-    #plt.title("id-Pool- P alway occurs for each id, Q with gaps")
-    plt.savefig(f"./since_plots/bench4/exp{exp}",dpi=500)
-    plt.close()
+
+
+    exp = 0
+
+
+    arr = [measure_MonPoly(event_generator_2,ts,evr,p,intervall_min,intervall_max) for ts in x]
+    runtime = [x[0] for x in arr]
+    mem = [x[1] for x in arr]
+    plot("MonPoly",x,runtime,2*exp)
+    plot("MonPoly",x,mem,2*exp+1)
+
+
+    figure("Number of timepoints","runtime[s]", f"./since_plots/bench2/runtime_monpoly",2*exp)
+    figure("Number of timepoints","memory usage[MiB]", f"./since_plots/bench2/memory",2*exp+1)
+
         
 
 
 if __name__ == '__main__':
-    #bench1()
-    #bench2()
-    #bench3()
-    #bench4()
+    bench1()
+    bench2()
 
-
-
-
-    total_events = [i*3000 for i in range(1,30,5)]
-    evr = 100
-
-    intervall_min = 2
-    intervall_max = 15
-
-    x = [i//evr for i in total_events]
-    x_ev = [i//evr for i in x]
-    exp = 10
-
-
-    for p in [0.9999]:
-        y_mply = [measure_MonPoly(event_generator_2,ts,evr,p,intervall_min,intervall_max) for ts in x]
-
-        plot("SLW",x_ev,y_mply)
-
-
-        plt.xlabel("number Q events")
-        plt.ylabel("runtime[s]")
-        plt.title(f"monpoly")
-        plt.savefig(f"./since_plots/bench4/mply_exp{exp}",dpi=500)
-        plt.close()
-        exp = 1
-        
 
 
 

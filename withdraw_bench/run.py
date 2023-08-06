@@ -6,9 +6,9 @@ import re
 
 # Parameters
 REP = 15
-TOTAL_EVENTS = [i*50 for i in range(1,20,5)]
+TOTAL_EVENTS = [i*200 for i in range(1,30,3)]
 #tOTAL_EVENTS = [50]
-PROGRAMS = ["optimized", "ex"]
+PROGRAMS = ["ex","optimized"]
 START_ID = 1
 EVR = 60
 
@@ -60,7 +60,7 @@ def measure(program: str, total_events: int) -> float:
     INPUT_FILE = 'input.txt'
     monpoly_input_generator(total_events, 'input2.log')
     translate_file('input2.log',INPUT_FILE)
-    args = ["/usr/bin/time",  "-f'%e %M MiB'", f"./{program}_ddlog/target/release/{program}_cli"]
+    args = ["/usr/bin/time",  "-f'%e %M '", f"./{program}_ddlog/target/release/{program}_cli"]
 
     mem_acc = 0.0
     time_acc = 0.0
@@ -69,14 +69,14 @@ def measure(program: str, total_events: int) -> float:
             proc = subprocess.run(args, stdin=input_file, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
         proc.check_returncode()
         measurements = proc.stderr.decode().strip().split()
-        elapsed, mem =  [float(item.replace("'", "")) for item in measurements[:-1]]
+        elapsed, mem =  [float(item.replace("'", "")) for item in measurements if item.replace("'", "").replace(".", "").isdigit()]
         #print(f"{elapsed:.2f}")
         time_acc += float(elapsed)
         mem_acc += float(mem)
     avg = time_acc / REP
     avg_mem =  mem_acc / REP
     print(f"{avg:.2f}")
-    return avg, avg_mem
+    return avg, round(avg_mem/1024.0)
 
 def measure_series(program: str) -> list[float]:
     arr = [measure(program, x) for x in TOTAL_EVENTS]
@@ -90,14 +90,14 @@ def monpoly_input_generator(total_events: int, filename:str):
         for ts in range(total_events):
             file.write(f"@{ts} ")
             for _ in range(0,EVR):
-                id1 = random.randrange(0,3000)
-                val = random.randrange(2000,7000)
+                id1 = random.randrange(0,3001)
+                val = random.randrange(2000,7001)
                 file.write(f"Withdraw({id1},{val})  \n")
     
 def measure2 (program: str, total_events: int) -> float:
     INPUT_FILE = f"input2.log"
     monpoly_input_generator(total_events,INPUT_FILE)
-    args = ["/usr/bin/time", "-f'%e %M MiB'", "monpoly","-negate", "-sig", "ex.sig", "-formula", "ex.mfotl", "-log" , "input2.log"]
+    args = ["/usr/bin/time", "-f'%e %M'", "monpoly", "-sig", "ex.sig", "-formula", "ex.mfotl", "-log" , "input2.log"]
     
     mem_acc = 0.0
     time_acc = 0.0
@@ -105,14 +105,14 @@ def measure2 (program: str, total_events: int) -> float:
         proc = subprocess.run(args, stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
         proc.check_returncode()
         measurements = proc.stderr.decode().strip().split()
-        elapsed, mem =  [float(item.replace("'", "")) for item in measurements[:-1]]
+        elapsed, mem =  [float(item.replace("'", "")) for item in measurements]
         #print(f"{elapsed:.2f}")
         time_acc += float(elapsed)
         mem_acc += float(mem)
     avg = time_acc / REP
     avg_mem =  mem_acc / REP
     print(f"{avg:.2f}")
-    return avg, avg_mem
+    return avg, round(avg_mem/1024.0)
 
 def measure_monpoly(program: str) -> list[float]:
     arr = [measure2(program, x) for x in TOTAL_EVENTS]
@@ -124,7 +124,10 @@ def measure_monpoly(program: str) -> list[float]:
 
 def main():
     for program in PROGRAMS:
-        label = f"{program}"
+        if(program == "ex"):
+            label = "not_optimized"
+        else: 
+            label = f"{program}"
         runtime, mem = measure_series(program)
         plt.figure(1)
         plt.plot(TOTAL_EVENTS, runtime, label=label)
@@ -144,13 +147,13 @@ def main():
 
 
     plt.figure(1)
-    plt.xlabel("tumber timepoints")
+    plt.xlabel("Number of timepoints")
     plt.ylabel("runtime [s]")
     plt.legend(loc='best')
     plt.savefig("Runtime.png", dpi = 500)
 
     plt.figure(2)
-    plt.xlabel("tumber timepoints")
+    plt.xlabel("Number of timepoints")
     plt.ylabel("memory usage [MiB]")
     plt.legend(loc='best')
     plt.savefig("Memory.png", dpi = 500)

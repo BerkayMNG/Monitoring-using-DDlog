@@ -1,6 +1,6 @@
 import re
 
-PATH = "../withdraw_bench"
+PATH = "./tests/and_2"
 
 def process_file(file_path_read:str, file_path_write:str):
     

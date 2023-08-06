@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 
 # Parameters
-REP = 3
+REP = 5
 TOTAL_EVENTS = [i*500 for i in range(1,18,2)]
 PROGRAMS = ["not_batched", "batched"]
 BATCH_SIZES = [100]
@@ -91,21 +91,25 @@ def main():
     for program in PROGRAMS:
         bsz = [1] if program == "not_batched" else BATCH_SIZES
         for batch_size in bsz:
-            label = f"{program}, batch size {batch_size}"
+            if program == "not_batched":
+                label = f"non-batched"
+            else: 
+                label = f"{program}, batch size {batch_size}"
             plt.plot(TOTAL_EVENTS, measure_series(program, batch_size), label=label)
 
     plt.xlabel("Number of matching pairs")
     plt.ylabel("runtime [s]")
     plt.legend(loc='best')
-    plt.savefig("comparisonWm.png", dpi = 500)
+    plt.savefig("comparison_final2.png", dpi = 500)
     
- 
+    
     label = "Monpoly"
     plt.plot(TOTAL_EVENTS,measure_monpoly("cnt"), label=label)
     plt.xlabel("Number of matching pairs")
     plt.ylabel("runtime [s]")
     plt.legend(loc='best')
-    plt.savefig("comparisonWm.png", dpi = 500)
+    plt.savefig("comparison_final2.png", dpi = 500)
+    
     
     
 if __name__ == '__main__':
